@@ -1,0 +1,133 @@
+<!-- 2. Student Dashboard Page -->
+ <!-- 2. Student Dashboard Page -->
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/student/student.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+    </style>
+</head>
+<body class="bg-gray-100 font-poppins text-gray-800">
+    
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="w-64 bg-gray-800 text-white p-6 shadow-xl rounded-r-3xl flex flex-col justify-between">
+            <div>
+                <div class="flex items-center mb-8">
+                    <img src="https://placehold.co/40x40/5c6ac4/ffffff?text=C" alt="Logo" class="rounded-full mr-3">
+                    <span class="text-xl font-bold">Canteen</span>
+                </div>
+                <nav>
+                    <a href="dashboard.html" class="flex items-center py-3 px-4 rounded-xl text-white bg-blue-600 font-semibold mb-2 transition-all hover:scale-105">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-9v10a1 1 0 01-1 1h-3m-6 0a1 1 0 00-1 1v2a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 00-1-1v0z"></path></svg>
+                        Dashboard
+                    </a>
+                    <a href="menu.html" class="flex items-center py-3 px-4 rounded-xl text-gray-300 hover:bg-gray-700 transition-all hover:scale-105 mb-2">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                        Menu
+                    </a>
+                    <a href="my-orders.html" class="flex items-center py-3 px-4 rounded-xl text-gray-300 hover:bg-gray-700 transition-all hover:scale-105">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M12 15h.01"></path></svg>
+                        My Orders
+                    </a>
+                </nav>
+            </div>
+            <a href="#" class="flex items-center py-3 px-4 rounded-xl text-gray-300 hover:bg-gray-700 transition-all hover:scale-105">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                Logout
+            </a>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 p-8 overflow-y-auto">
+            <h1 class="text-4xl font-bold mb-8">Student Dashboard</h1>
+
+            <!-- Featured Items / Quick Access -->
+            <div class="bg-blue-600 text-white rounded-3xl p-8 mb-8 shadow-lg">
+                <div class="flex items-center mb-4">
+                    <svg class="w-8 h-8 mr-4" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-1-17.76V12h-6.76C4.088 8.04 7.218 5.24 11 4.24zM13 4.24v7.76h6.76c-.96-3.882-4.09-6.682-7.76-7.76zM4.24 13h7.76v6.76c-3.882-.96-6.682-4.09-7.76-7.76zM12 19.76V13h6.76c-.96 3.882-4.09 6.682-7.76 7.76z"/></svg>
+                    <h2 class="text-3xl font-bold">Today's Specials</h2>
+                </div>
+                <p class="text-sm opacity-90 mb-6">Explore the featured items and popular picks for today.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Example of a featured item card -->
+                    <div class="bg-white text-gray-800 rounded-2xl shadow-lg p-4 flex items-center transform hover:scale-105 transition-transform cursor-pointer">
+                        <img src="https://placehold.co/80x80/28a745/ffffff?text=Burger" alt="Burger" class="rounded-xl mr-4">
+                        <div>
+                            <h3 class="font-bold text-lg">Spicy Chicken Burger</h3>
+                            <p class="text-gray-500 text-sm">₹80</p>
+                        </div>
+                    </div>
+                    <div class="bg-white text-gray-800 rounded-2xl shadow-lg p-4 flex items-center transform hover:scale-105 transition-transform cursor-pointer">
+                        <img src="https://placehold.co/80x80/ffc107/000000?text=Pizza" alt="Pizza" class="rounded-xl mr-4">
+                        <div>
+                            <h3 class="font-bold text-lg">Veggie Pizza Slice</h3>
+                            <p class="text-gray-500 text-sm">₹60</p>
+                        </div>
+                    </div>
+                    <div class="bg-white text-gray-800 rounded-2xl shadow-lg p-4 flex items-center transform hover:scale-105 transition-transform cursor-pointer">
+                        <img src="https://placehold.co/80x80/007bff/ffffff?text=Drink" alt="Drink" class="rounded-xl mr-4">
+                        <div>
+                            <h3 class="font-bold text-lg">Cold Coffee</h3>
+                            <p class="text-gray-500 text-sm">₹45</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Menu Preview Section -->
+                <div class="lg:col-span-2">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-3xl font-bold">Menu Categories</h2>
+                        <a href="menu.html" class="text-blue-600 font-semibold hover:underline">View All &rarr;</a>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6" id="menu-categories">
+                        <!-- Category Cards will be dynamically added here -->
+                    </div>
+                </div>
+
+                <!-- Order Queue Section -->
+                <div class="lg:col-span-1">
+                    <div class="bg-white rounded-3xl shadow-lg p-6">
+                        <h2 class="text-xl font-bold mb-4">Live Order Queue</h2>
+                        <ul id="order-queue" class="space-y-4">
+                            <!-- Live orders will be dynamically added here -->
+                            <li class="flex items-center">
+                                <span class="bg-yellow-400 w-2 h-2 rounded-full mr-3 animate-pulse"></span>
+                                <div>
+                                    <p class="text-sm font-semibold">Order #7890</p>
+                                    <p class="text-xs text-gray-500">Preparing...</p>
+                                </div>
+                            </li>
+                            <li class="flex items-center">
+                                <span class="bg-green-500 w-2 h-2 rounded-full mr-3"></span>
+                                <div>
+                                    <p class="text-sm font-semibold">Order #7889</p>
+                                    <p class="text-xs text-gray-500">Ready for pickup</p>
+                                </div>
+                            </li>
+                            <li class="flex items-center">
+                                <span class="bg-blue-500 w-2 h-2 rounded-full mr-3"></span>
+                                <div>
+                                    <p class="text-sm font-semibold">Order #7888</p>
+                                    <p class="text-xs text-gray-500">Accepted</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="../../js/student/student.js"></script>
+    <script src="../../js/main.js"></script>
+</body>
+</html>

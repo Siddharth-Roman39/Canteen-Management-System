@@ -1,0 +1,47 @@
+<!-- 6. Order Confirmation Page -->
+ <!-- 6. Order Confirmation Page -->
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmed</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/student/student.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen font-poppins text-gray-800">
+
+    <div class="container bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full mx-4 text-center">
+        <div class="flex flex-col items-center mb-6">
+            <svg class="w-20 h-20 text-green-500 mb-4" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+            <h1 class="text-4xl font-bold text-green-600 mb-2">Order Confirmed!</h1>
+            <p class="text-gray-500 text-center">Your order has been successfully placed.</p>
+        </div>
+        
+        <div class="bg-gray-50 rounded-2xl p-6 mb-6 text-left">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-gray-600">Order ID:</span>
+                <span class="font-bold">#ORD-12345</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-gray-600">Estimated Pickup Time:</span>
+                <span class="font-bold text-blue-600">15-20 minutes</span>
+            </div>
+        </div>
+
+        <button class="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition-all shadow-lg transform hover:scale-105 mb-4" onclick="window.location.href='my-orders.html'">
+            Track My Order
+        </button>
+        <button class="w-full bg-white text-gray-700 py-3 rounded-xl font-semibold border border-gray-300 hover:bg-gray-200 transition-colors" onclick="window.location.href='dashboard.html'">
+            Back to Dashboard
+        </button>
+
+    </div>
+    
+    <script src="../../js/student/student.js"></script>
+</body>
+</html>
