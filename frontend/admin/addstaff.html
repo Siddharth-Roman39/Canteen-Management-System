@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Add Staff</title>
+    <link rel="stylesheet" href="admin.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="layout">
+        <div class="sidebar">
+             <h2>Admin Panel</h2>
+             <a href="dashboard.html">Dashboard</a>
+             <a href="staff.html" class="active">Staff</a>
+             </div>
+
+        <div class="content">
+            <header>
+                <h1>Add New Staff Member</h1>
+            </header>
+
+            <div id="messageContainer"></div> <div class="card form-container-card">
+                <h3>Staff Credentials and Role</h3>
+                
+                <form id="addStaffForm">
+                    
+                    <div class="form-group">
+                        <label for="staffName">Name</label>
+                        <input type="text" id="staffName" class="form-input" required placeholder="Enter full name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="staffEmail">Email (Login ID)</label>
+                        <input type="email" id="staffEmail" class="form-input" required placeholder="name@domain.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="staffRole">Role</label>
+                        <select id="staffRole" class="form-input" required>
+                            <option value="" disabled selected>Select staff role</option>
+                            <option value="Manager">Manager</option>
+                            <option value="Chef">Chef</option>
+                            <option value="Waiter">Waiter/Server</option>
+                            <option value="Cashier">Cashier</option>
+                            <option value="Other">Other Staff</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="form-submit-btn">Add Staff Member</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script src="admin.js"></script>
+</body>
+</html>

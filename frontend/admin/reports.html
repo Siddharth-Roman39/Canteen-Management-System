@@ -1,0 +1,72 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Orders & Reports - CMS</title>
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar">
+            <h2>🍴 CMS Admin</h2>
+            <a href="dashboard.html">📊 Dashboard</a>
+            <a href="menu.html">🍴 Menu Management</a>
+            <a href="reports.html" class="active">📦 Orders & Reports</a>
+            <a href="staff.html">👥 User Management</a>
+            <a href="analytics.html">📈 Analytics (Placeholder)</a>
+            <a href="announcements.html">📢 Announcements (Placeholder)</a>
+            <a href="index.html">🔐 Logout</a> 
+        </aside>
+
+        <main class="content">
+            <header>
+                <h1>📦 Orders & Reports</h1>
+            </header>
+
+            <section class="stats" style="margin-bottom: 20px;">
+                <div class="stat-card">
+                    <h3>Monthly Revenue</h3>
+                    <p>₹ 4,50,000</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Orders (Month)</h3>
+                    <p>3,200</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Cancelled Orders</h3>
+                    <p>12</p>
+                </div>
+            </section>
+            
+            <section class="card">
+                <h3>Order History</h3>
+                <p style="margin-bottom: 15px;">Filter by Date: <input type="date" style="padding:5px;"> Status: 
+                    <select style="padding:5px;">
+                        <option>All</option>
+                        <option>Completed</option>
+                        <option>Pending</option>
+                    </select>
+                </p>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Items</th>
+                            <th>Total Amount</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>#153</td><td>Veg Thali, Roti (3)</td><td>₹ 250</td><td>12:30 PM</td><td>Completed</td></tr>
+                        <tr><td>#152</td><td>Sandwich, Fries</td><td>₹ 120</td><td>11:45 AM</td><td>Pending</td></tr>
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>

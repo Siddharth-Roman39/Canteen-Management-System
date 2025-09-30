@@ -1,0 +1,72 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management - CMS</title>
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar">
+            <h2>🍴 CMS Admin</h2>
+            <a href="dashboard.html">📊 Dashboard</a>
+            <a href="menu.html">🍴 Menu Management</a>
+            <a href="reports.html">📦 Orders & Reports</a>
+            <a href="staff.html" class="active">👥 User Management</a>
+            <a href="analytics.html">📈 Analytics</a>
+            <a href="announcements.html">📢 Announcements</a>
+            <a href="index.html">🔐 Logout</a> 
+        </aside>
+
+        <main class="content">
+            <header>
+                <h1>👥 User Management (Staff & Students)</h1>
+            </header>
+            
+            <div id="messageContainer"></div> <!-- Added for feedback messages -->
+
+            <section class="card" style="margin-bottom: 20px;">
+                <h3>Staff List</h3>
+                <!-- Fixed link to add-staff.html -->
+                <button onclick="window.location.href='addstaff.html'" style="padding:8px 15px; background:var(--primary-color); color:white; border:none; border-radius:4px; margin-bottom: 15px; font-weight: bold;">+ Add New Staff</button>
+                <table class="data-table" id="staffTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="staffTableBody">
+                        <!-- Staff data will be dynamically injected here by admin.js -->
+                    </tbody>
+                </table>
+            </section>
+            
+            <section class="card">
+                <h3>Student Accounts</h3>
+                <table class="data-table" id="studentTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Balance</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentTableBody">
+                        <!-- Student data will be dynamically injected here by admin.js -->
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>

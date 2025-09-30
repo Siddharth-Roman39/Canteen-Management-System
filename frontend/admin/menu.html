@@ -1,0 +1,85 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Menu Management - CMS</title>
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar">
+            <h2>🍴 CMS Admin</h2>
+            <a href="dashboard.html">📊 Dashboard</a>
+            <a href="menu.html" class="active">🍴 Menu Management</a>
+            <a href="reports.html">📦 Orders & Reports</a>
+            <a href="staff.html">👥 User Management</a>
+            <a href="analytics.html">📈 Analytics (Placeholder)</a>
+            <a href="announcements.html">📢 Announcements (Placeholder)</a>
+            <a href="index.html">🔐 Logout</a> 
+        </aside>
+
+        <main class="content">
+            <header>
+                <h1>🍴 Menu Management</h1>
+            </header>
+
+            <section class="card" style="margin-bottom: 20px;">
+                <h3>Add New Menu Item</h3>
+                <form id="addItemForm" style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <input type="text" placeholder="Item Name" required style="padding:8px; flex:1;">
+                    <input type="number" placeholder="Price (₹)" required style="padding:8px; width:100px;">
+                    <select style="padding:8px;">
+                        <option>Main Course</option>
+                        <option>Snack</option>
+                        <option>Beverage</option>
+                    </select>
+                    <button type="submit" style="padding:8px 15px; background:green; color:white; border:none; border-radius:4px;">+ Add Item</button>
+                </form>
+            </section>
+
+            <section class="card">
+                <h3>Current Menu</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Item Name</th>
+                            <th>Price</th>
+                            <th>Category</th>
+                            <th>Availability</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>101</td>
+                            <td>Veg Burger</td>
+                            <td>₹ 150</td>
+                            <td>Snack</td>
+                            <td>In Stock</td>
+                            <td>
+                                <button class="edit-btn">Edit</button>
+                                <button class="delete-btn">Delete</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>102</td>
+                            <td>Cold Coffee</td>
+                            <td>₹ 80</td>
+                            <td>Beverage</td>
+                            <td>In Stock</td>
+                            <td>
+                                <button class="edit-btn">Edit</button>
+                                <button class="delete-btn">Delete</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>
