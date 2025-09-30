@@ -1,0 +1,91 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Out of Stock</title>
+  <link rel="stylesheet" href="staff.css">
+  
+   
+</head>
+<body>
+  <div class="layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <h2>🍴 CMS</h2>
+      <a href="dashboard.html">📋 Dashboard</a>
+      <a href="outofstock.html" class="active">🥘 Stock</a>
+      <a href="reports.html">📊 Reports</a>
+      <a href="profile.html">👤 Profile</a>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="content">
+      <header>
+        <h2>🥘 Manage Stock</h2>
+      </header>
+
+      <div class="stock-grid">
+        <!-- Fast Food Items -->
+        <div class="stock-card">
+          <span class="stock-name">Sandwich</span>
+          <div class="toggle" onclick="toggleStock(this)"></div>
+        </div>
+        <div class="stock-card">
+          <span class="stock-name">Pizza</span>
+          <div class="toggle active" onclick="toggleStock(this)"></div>
+        </div>
+        <div class="stock-card">
+          <span class="stock-name">Burger</span>
+          <div class="toggle active" onclick="toggleStock(this)"></div>
+        </div>
+
+        <!-- Indian Veg Items -->
+        <div class="stock-card">
+          <span class="stock-name">Paneer Butter Masala</span>
+          <div class="toggle" onclick="toggleStock(this)"></div>
+        </div>
+        <div class="stock-card">
+          <span class="stock-name">Chole Bhature</span>
+          <div class="toggle active" onclick="toggleStock(this)"></div>
+        </div>
+        <div class="stock-card">
+          <span class="stock-name">Vegetable Biryani</span>
+          <div class="toggle" onclick="toggleStock(this)"></div>
+        </div>
+        <div class="stock-card">
+          <span class="stock-name">Aloo Gobi</span>
+          <div class="toggle active" onclick="toggleStock(this)"></div>
+        </div>
+        <div class="stock-card">
+          <span class="stock-name">Masala Dosa</span>
+          <div class="toggle" onclick="toggleStock(this)"></div>
+        </div>
+        <div class="stock-card">
+          <span class="stock-name">Palak Paneer</span>
+          <div class="toggle" onclick="toggleStock(this)"></div>
+        </div>
+        <div class="stock-card">
+          <span class="stock-name">Dal Tadka</span>
+          <div class="toggle active" onclick="toggleStock(this)"></div>
+        </div>
+        <div class="stock-card">
+          <span class="stock-name">Veg Pakora</span>
+          <div class="toggle" onclick="toggleStock(this)"></div>
+        </div>
+        <div class="stock-card">
+          <span class="stock-name">Roti / Naan</span>
+          <div class="toggle active" onclick="toggleStock(this)"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function toggleStock(el) {
+      el.classList.toggle('active');
+    }
+  </script>
+</body>
+</html>
