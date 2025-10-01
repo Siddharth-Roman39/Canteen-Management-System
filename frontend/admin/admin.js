@@ -70,12 +70,11 @@ function showTempMessage(message, type = 'success') {
 function checkAuth() {
     const isLoggedIn = sessionStorage.getItem('isAdminLoggedIn');
     const currentPage = window.location.pathname.split('/').pop();
-    
+
     if (isLoggedIn !== 'true') {
-        // Only redirect if we are not already on the login page
-        if (currentPage !== 'index.html' && currentPage !== '') {
+        if (currentPage !== '../common/login.html' && currentPage !== '') {
             console.log("Not authenticated. Redirecting to login.");
-            window.location.href = "index.html";
+            window.location.href = "dashboard.html";
             return false;
         }
     }
@@ -86,9 +85,8 @@ function checkAuth() {
 function handleLogout() {
     sessionStorage.removeItem('isAdminLoggedIn');
     console.log("Logged out.");
-    window.location.href = "index.html";
+    window.location.href = "../common/login.html";
 }
-
 
 // =================================
 // II. AUTHENTICATION LOGIC (for index.html)
@@ -101,10 +99,9 @@ function handleLogin(event) {
     const password = document.getElementById('password').value;
     
     // --- Mock Authentication Logic ---
-    // User credentials: admin@cms.com / admin123
     if (email === "admin@cms.com" && password === "admin123") {
         sessionStorage.setItem('isAdminLoggedIn', 'true');
-        console.log("Login Successful! Redirecting...");
+        console.log("Login Successful! Redirecting to dashboard...");
         window.location.href = "dashboard.html";
     } else {
         showTempMessage("Invalid credentials. Please use admin@cms.com and admin123.", 'error');
@@ -386,22 +383,17 @@ function handleAddStaff(event) {
 document.addEventListener('DOMContentLoaded', function() {
     const currentPage = window.location.pathname.split('/').pop();
 
-    if (currentPage === 'index.html' || currentPage === '') {
-        // 1. Login Page Initialization
+    if (currentPage === 'login.html') {
+        // Login Page
         const loginForm = document.getElementById('loginForm');
         if (loginForm) {
             loginForm.addEventListener('submit', handleLogin);
         }
     } else {
-        // 2. Authenticate all other Admin Pages
-        if (checkAuth()) { 
-            // 3. Initialize specific page functions
+        // Other pages → must be logged in
+        if (checkAuth()) {
             if (currentPage === 'dashboard.html') {
                 updateDashboardMetrics();
-            } else if (currentPage === 'menu.html') {
-                // initMenuManagement(); // Placeholder
-            } else if (currentPage === 'reports.html') {
-                // initReports(); // Placeholder
             } else if (currentPage === 'analytics.html') {
                 initAnalytics();
             } else if (currentPage === 'announcements.html') {
@@ -412,8 +404,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 initAddStaffPage();
             }
 
-            // 4. Attach logout handler to the sidebar logout link
-            const logoutLink = document.querySelector('.sidebar a[href="index.html"]');
+            // Attach logout handler
+            const logoutLink = document.querySelector('.sidebar a[href="../common/login.html"]');
             if (logoutLink) {
                 logoutLink.addEventListener('click', function(e) {
                     e.preventDefault();

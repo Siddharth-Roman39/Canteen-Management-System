@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Canteen Login</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f4f4; }
+    .container { max-width: 400px; margin: 80px auto; background: #fff; padding: 25px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1);}
+    h2 { text-align: center; color: #ff6600; }
+    input, select, button { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; }
+    button { background: #ff6600; color: #fff; border: none; cursor: pointer; }
+    button:hover { background: #e65c00; }
+    .error { color: red; font-size: 0.9em; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Login</h2>
+    <div id="error" class="error"></div>
+
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="password" id="password" placeholder="Password" required>
+
+    <select id="role">
+      <option value="student">Student</option>
+      <option value="staff">Staff</option>
+      <option value="admin">Admin</option>
+    </select>
+
+    <button id="loginBtn">Login</button>
+
+    <p style="text-align:center; margin-top:10px;">
+      Don't have an account? <a href="signup.html">Sign Up</a>
+    </p>
+  </div>
+
+  <script>
+    document.getElementById("loginBtn").addEventListener("click", () => {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      const role = document.getElementById("role").value;
+      const errorDiv = document.getElementById("error");
+
+      errorDiv.innerText = "";
+
+      if(!email || !password){
+        errorDiv.innerText = "All fields are required";
+        return;
+      }
+
+      if(role === "admin"){
+        if(email === "admin@vit.edu.in" && password === "admin@123"){
+          window.location.href = "../admin/dashboard.html";
+        } else {
+          errorDiv.innerText = "Invalid admin credentials";
+        }
+      } else if(role === "student"){
+        // TODO: connect backend later
+        window.location.href = "../student/dashboard.html";
+      } else if(role === "staff"){
+        if(email === "staff@vit.edu.in" && password === "staff@123"){
+          window.location.href = "../staff/dashboard.html";
+        }
+      }
+    });
+  </script>
+</body>
+</html>
