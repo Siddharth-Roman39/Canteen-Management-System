@@ -1,185 +1,127 @@
 // =========================================================
-// js/admin.js - CONSOLIDATED JAVASCRIPT
-// Handles Auth, Navigation, and Page-Specific Initialization
-// (This is your original file with only syntax errors corrected)
+// js/admin.js - CONSOLIDATED JAVASCRIPT (Updated for API)
 // =========================================================
 
-// =================================
 // I. SHARED UTILITIES
-// =================================
-
-/**
- * Custom function to display a temporary message in a dedicated container.
- * @param {string} message - The message text.
- * @param {string} type - 'success', 'error', or 'info'.
- */
 function showTempMessage(message, type = 'success') {
     const container = document.getElementById('messageContainer');
     if (!container) {
         console.error("Message container not found. Using console only.");
-        // SYNTAX FIX: Added backticks (`) for template literal
         console.log(`MESSAGE (${type.toUpperCase()}): ${message}`);
         return;
     }
-
     const alertDiv = document.createElement('div');
     alertDiv.textContent = message;
     alertDiv.style.cssText = `
-        padding: 10px 20px;
-        margin-bottom: 15px;
-        border-radius: 4px;
-        font-weight: bold;
-        color: white;
-        text-align: center;
-        opacity: 0;
-        transition: opacity 0.5s ease;
+        padding: 10px 20px; margin-bottom: 15px; border-radius: 4px;
+        font-weight: bold; color: white; text-align: center;
+        opacity: 0; transition: opacity 0.5s ease;
     `;
+    if (type === 'success') alertDiv.style.backgroundColor = '#28a745';
+    else if (type === 'error') alertDiv.style.backgroundColor = '#dc3545';
+    else alertDiv.style.backgroundColor = '#007bff';
 
-    if (type === 'success') {
-        alertDiv.style.backgroundColor = '#28a745'; // Green
-    } else if (type === 'error') {
-        alertDiv.style.backgroundColor = '#dc3545'; // Red
-    } else {
-        alertDiv.style.backgroundColor = '#007bff'; // Blue
-    }
-
-    container.innerHTML = ''; // Clear previous message
+    container.innerHTML = '';
     container.appendChild(alertDiv);
-
-    // Fade in
-    setTimeout(() => {
-        alertDiv.style.opacity = 1;
-    }, 10);
-
-    // Fade out and remove after 3 seconds
+    setTimeout(() => { alertDiv.style.opacity = 1; }, 10);
     setTimeout(() => {
         alertDiv.style.opacity = 0;
-        setTimeout(() => {
-            // Check if the element is still a child before trying to remove it
-            if (container.contains(alertDiv)) {
-                container.removeChild(alertDiv);
-            }
-        }, 500);
+        setTimeout(() => { if (container.contains(alertDiv)) container.removeChild(alertDiv); }, 500);
     }, 3000);
 }
 
-/**
- * Checks if the admin is logged in. If not, redirects to the login page.
- * @returns {boolean} True if logged in, false otherwise.
- */
-function checkAuth() {
-    const isLoggedIn = sessionStorage.getItem('isAdminLoggedIn');
-    const currentPage = window.location.pathname.split('/').pop();
+// II. AUTHENTICATION (JWT)
+function handleLogin(event) {
+    event.preventDefault();
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
 
-    if (isLoggedIn !== 'true') {
-        if (currentPage !== '../common/login.html' && currentPage !== '') {
-            console.log("Not authenticated. Redirecting to login.");
+    fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+    })
+    .then(res => res.json())
+    .then(data => {
+        console.log("📥 Login Response:", data); // log full response
+
+        if (data.token && data.role === "admin") {
+            localStorage.setItem("token", data.token);
+
+            // ✅ print token to console so you can verify
+            console.log("🔑 JWT Token stored:", data.token);
+
+            alert("Admin login successful!");
             window.location.href = "dashboard.html";
-            return false;
+        } else {
+            showTempMessage("Invalid admin credentials!", "error");
         }
-    }
-    return isLoggedIn === 'true';
+    })
+    .catch(err => {
+        console.error("🚨 Login error:", err);
+        showTempMessage("Login failed. Try again later.", "error");
+    });
 }
 
-// Function to handle logout
+function checkAuth() {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+        console.log("⚠️ No JWT token found. Redirecting to login.");
+        window.location.href = "../common/login.html";
+        return false;
+    }
+
+    // ✅ show token in console when checking
+    console.log("✅ JWT token found in localStorage:", token);
+    return true;
+}
+
 function handleLogout() {
-    sessionStorage.removeItem('isAdminLoggedIn');
-    console.log("Logged out.");
+    console.log("🗑️ Logging out. Token before removal:", localStorage.getItem("token"));
+
+    localStorage.removeItem("token");
+
+    console.log("✅ Token removed. Current token value:", localStorage.getItem("token"));
+    alert("Logged out!");
     window.location.href = "../common/login.html";
 }
 
-// =================================
-// II. AUTHENTICATION LOGIC (for index.html)
-// =================================
 
-function handleLogin(event) {
-    event.preventDefault();
-    
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    
-    // --- Mock Authentication Logic ---
-    if (email === "admin@cms.com" && password === "admin123") {
-        sessionStorage.setItem('isAdminLoggedIn', 'true');
-        console.log("Login Successful! Redirecting to dashboard...");
-        window.location.href = "dashboard.html";
-    } else {
-        showTempMessage("Invalid credentials. Please use admin@cms.com and admin123.", 'error');
-    }
-}
-
-
-// =================================
-// III. DASHBOARD & ANALYTICS LOGIC 
-// =================================
-
+// III. DASHBOARD & ANALYTICS
 function updateDashboardMetrics() {
-    // --- MOCK DATA ---
-    const metrics = {
-        todayRevenue: 15450,
-        todayOrders: 124,
-        pendingPayments: 3,
-        activeStaff: 8
-    };
+    fetch("http://localhost:5000/api/admin/stats", {
+        headers: { "Authorization": "Bearer " + localStorage.getItem("token") }
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById('todayRevenue').textContent = `₹ ${data.todayRevenue?.toLocaleString('en-IN') || 0}`;
+        document.getElementById('todayOrders').textContent = data.todayOrders || 0;
+        document.getElementById('pendingPayments').textContent = data.pendingPayments || 0;
+        document.getElementById('activeStaff').textContent = data.activeStaff || 0;
 
-    const recentOrders = [
-        { id: 153, item: 'Veg Thali', status: 'Paid', payment: '₹ 250' },
-        { id: 152, item: 'Sandwich', status: 'Pending', payment: '₹ 120' },
-        { id: 151, item: 'Cold Coffee', status: 'Paid', payment: '₹ 80' },
-        { id: 150, item: 'Chicken Roll', status: 'Paid', payment: '₹ 180' }
-    ];
-    // -----------------
-
-    // Update stat cards
-    // SYNTAX FIX: Added backticks (`) and moved currency symbol inside
-    document.getElementById('todayRevenue').textContent = `₹ ${metrics.todayRevenue.toLocaleString('en-IN')}`;
-    document.getElementById('todayOrders').textContent = metrics.todayOrders;
-    document.getElementById('pendingPayments').textContent = metrics.pendingPayments;
-    document.getElementById('activeStaff').textContent = metrics.activeStaff;
-
-    // Render Recent Orders List
-    const ordersList = document.getElementById('recentOrdersList');
-    if (ordersList) {
-        ordersList.innerHTML = '';
-        recentOrders.forEach(order => {
-            const statusStyle = order.status === 'Pending' ? 'style="color:red; font-weight:bold;"' : 'style="color:green;"';
-            const li = document.createElement('li');
-            // SYNTAX FIX: Added backticks (`) for template literal
-            li.innerHTML = `#${order.id} - ${order.item} (${order.payment}) <span ${statusStyle}>${order.status}</span>`;
-            ordersList.appendChild(li);
-        });
-    }
+        const ordersList = document.getElementById('recentOrdersList');
+        if (ordersList && data.recentOrders) {
+            ordersList.innerHTML = '';
+            data.recentOrders.forEach(order => {
+                const statusStyle = order.status === 'Pending'
+                    ? 'style="color:red; font-weight:bold;"'
+                    : 'style="color:green;"';
+                const li = document.createElement('li');
+                li.innerHTML = `#${order.id} - ${order.item} (${order.payment}) <span ${statusStyle}>${order.status}</span>`;
+                ordersList.appendChild(li);
+            });
+        }
+    })
+    .catch(err => console.error("🚨 Dashboard fetch error:", err));
 }
 
-// NOTE: Chart.js is assumed to be loaded for initAnalytics to work.
 function initAnalytics() {
     console.log("Analytics Initialized.");
-    const ctxBar = document.getElementById('salesChart');
-    const ctxLine = document.getElementById('revenueChart');
-
-    // MOCK DATA for Chart.js
-    const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    const salesData = [520, 480, 410, 600, 750, 450, 300];
-    const revenueData = [12000, 11500, 9800, 14500, 18000, 10500, 7500];
-
-    // Ensure Chart is available (as it would be loaded via a script tag in analytics.html)
-    if (typeof Chart !== 'undefined') {
-        if (ctxBar) {
-            new Chart(ctxBar, { type: 'bar', data: { labels: labels, datasets: [{ label: 'Units Sold', data: salesData, backgroundColor: 'rgba(63, 81, 181, 0.7)', borderColor: 'rgba(63, 81, 181, 1)', borderWidth: 1 }] }, options: { responsive: true, scales: { y: { beginAtZero: true } } } });
-        }
-        if (ctxLine) {
-            new Chart(ctxLine, { type: 'line', data: { labels: labels, datasets: [{ label: 'Daily Revenue (₹)', data: revenueData, borderColor: 'rgba(255, 152, 0, 1)', backgroundColor: 'rgba(255, 152, 0, 0.2)', fill: true, tension: 0.3 }] }, options: { responsive: true, scales: { y: { beginAtZero: false } } } });
-        }
-    } else {
-        console.warn("Chart.js not loaded. Analytics charts will not display.");
-    }
+    // still static charts unless you add API
 }
 
-
-// =================================
-// IV. ANNOUNCEMENTS LOGIC
-// =================================
-
+// IV. ANNOUNCEMENTS
 function handleCreateNotice(event) {
     event.preventDefault();
     const title = document.getElementById('noticeTitle').value;
@@ -191,116 +133,26 @@ function handleCreateNotice(event) {
         return;
     }
 
-    // --- Mock Data Submission ---
-    // SYNTAX FIX: Added backticks (`) for template literal
     console.log(`Notice Created: Title: ${title}, Audience: ${audience}`);
     showTempMessage("Notice successfully posted!");
-
-    // Reset form
     document.getElementById('noticeForm').reset();
 }
 
 function initAnnouncements() {
-    console.log("Announcements Initialized.");
     const form = document.getElementById('noticeForm');
-    if (form) {
-        form.addEventListener('submit', handleCreateNotice);
-    }
+    if (form) form.addEventListener('submit', handleCreateNotice);
 }
 
-// =================================
-// V. STAFF MANAGEMENT LOGIC (for staff.html and add-staff.html)
-// =================================
-
-// --- MOCK DATA ---
-const mockStaffData = [
-    { id: 'S001', name: 'Priya Sharma', role: 'Manager', status: 'Active' },
-    { id: 'S002', name: 'Ravi Kumar', role: 'Chef', status: 'Active' },
-    { id: 'S003', name: 'Anjali Desai', role: 'Cashier', status: 'Active' },
-    { id: 'S004', name: 'Vikram Singh', role: 'Waiter', status: 'On Leave' }
-];
-
-const mockStudentData = [
-    { id: '1001', name: 'Amit Singh', email: 'amit@college.edu', balance: 550 },
-    { id: '1002', name: 'Neha Patel', email: 'neha@college.edu', balance: 120 },
-    { id: '1003', name: 'Karan Joshi', email: 'karan@college.edu', balance: -50, status: 'Suspended' } // Negative balance example
-];
-
-// Action Handlers (Stubs)
-function handleEditRole(staffId) {
-    // SYNTAX FIX: Added backticks (`) for template literal
-    console.log(`Editing role for staff ID: ${staffId}`);
-    // SYNTAX FIX: Added backticks (`) for template literal
-    showTempMessage(`Action: Ready to edit role for ${staffId}`, 'info');
-}
-
-function handleRemoveStaff(staffId) {
-    // SYNTAX FIX: Added backticks (`) for template literal
-    console.log(`Removing staff ID: ${staffId}`);
-    // SYNTAX FIX: Added backticks (`) for template literal
-    showTempMessage(`Action: Staff member ${staffId} removed (mock action)`, 'error');
-}
-
-function handleResetPass(studentId) {
-    // SYNTAX FIX: Added backticks (`) for template literal
-    console.log(`Resetting password for student ID: ${studentId}`);
-    // SYNTAX FIX: Added backticks (`) for template literal
-    showTempMessage(`Action: Password reset initiated for ${studentId}`, 'success');
-}
-
-function handleSuspendStudent(studentId) {
-    // SYNTAX FIX: Added backticks (`) for template literal
-    console.log(`Suspending student ID: ${studentId}`);
-    // SYNTAX FIX: Added backticks (`) for template literal
-    showTempMessage(`Action: Student ${studentId} suspended (mock action)`, 'error');
-}
-
-function handleStaffAction(event) {
-    const target = event.target;
-    if (target.tagName !== 'BUTTON') return;
-
-    const id = target.closest('tr').dataset.id;
-    const action = target.textContent.trim();
-    
-    const isStudentTable = target.closest('table').id === 'studentTable';
-
-    if (isStudentTable) {
-        switch (action) {
-            case 'Reset Pass':
-                handleResetPass(id);
-                break;
-            case 'Suspend':
-                handleSuspendStudent(id);
-                break;
-            default:
-                // SYNTAX FIX: Added backticks (`) for template literal
-                console.warn(`Unknown student action: ${action}`);
-        }
-    } else {
-        switch (action) {
-            case 'Edit Role':
-                handleEditRole(id);
-                break;
-            case 'Remove':
-                handleRemoveStaff(id);
-                break;
-            default:
-                // SYNTAX FIX: Added backticks (`) for template literal
-                console.warn(`Unknown staff action: ${action}`);
-        }
-    }
-}
-
-function renderStaffTable() {
+// V. STAFF MANAGEMENT (API version)
+function renderStaffTable(staffList) {
     const tbody = document.getElementById('staffTableBody');
     if (!tbody) return;
-
-    tbody.innerHTML = mockStaffData.map(staff => `
-        <tr data-id="${staff.id}">
-            <td>${staff.id}</td>
+    tbody.innerHTML = staffList.map(staff => `
+        <tr data-id="${staff._id}">
+            <td>${staff._id}</td>
             <td>${staff.name}</td>
             <td>${staff.role}</td>
-            <td><span style="color:${staff.status === 'Active' ? 'green' : 'red'}; font-weight:bold;">${staff.status}</span></td>
+            <td><span style="color:${staff.status === 'Active' ? 'green' : 'red'}; font-weight:bold;">${staff.status || 'Active'}</span></td>
             <td>
                 <button class="edit-btn">Edit Role</button>
                 <button class="delete-btn">Remove</button>
@@ -309,102 +161,40 @@ function renderStaffTable() {
     `).join('');
 }
 
-function renderStudentTable() {
-    const tbody = document.getElementById('studentTableBody');
-    if (!tbody) return;
-
-    tbody.innerHTML = mockStudentData.map(student => `
-        <tr data-id="${student.id}">
-            <td>${student.id}</td>
-            <td>${student.name}</td>
-            <td>${student.email}</td>
-            <td><span style="color:${student.balance < 0 ? 'red' : 'green'}; font-weight:bold;">₹ ${student.balance}</span></td>
-            <td>
-                <button class="edit-btn">Reset Pass</button>
-                <button class="delete-btn">Suspend</button>
-            </td>
-        </tr>
-    `).join('');
-}
-
 function initStaffManagement() {
-    console.log("Staff Management Initialized.");
-    
-    // 1. Render data
-    renderStaffTable();
-    renderStudentTable();
-
-    // 2. Attach click listeners using event delegation to the table wrappers
-    const staffTable = document.getElementById('staffTable');
-    const studentTable = document.getElementById('studentTable');
-
-    if (staffTable) {
-        staffTable.addEventListener('click', handleStaffAction);
-    }
-    if (studentTable) {
-        studentTable.addEventListener('click', handleStaffAction);
-    }
+    fetch("http://localhost:5000/api/admin/staff", {
+        headers: { "Authorization": "Bearer " + localStorage.getItem("token") }
+    })
+    .then(res => res.json())
+    .then(staffList => {
+        renderStaffTable(staffList);
+        const staffTable = document.getElementById('staffTable');
+        if (staffTable) staffTable.addEventListener('click', handleStaffAction);
+    })
+    .catch(err => console.error("🚨 Staff fetch error:", err));
 }
 
-function initAddStaffPage() {
-    console.log("Add Staff Page Initialized.");
-    const form = document.getElementById('addStaffForm');
-    if (form) {
-        form.addEventListener('submit', handleAddStaff);
-    }
+function handleStaffAction(event) {
+    const target = event.target;
+    if (target.tagName !== 'BUTTON') return;
+    const id = target.closest('tr').dataset.id;
+    console.log(`Staff action on ID: ${id}`);
 }
 
-function handleAddStaff(event) {
-    event.preventDefault();
-    const name = document.getElementById('staffName').value;
-    const email = document.getElementById('staffEmail').value;
-    const role = document.getElementById('staffRole').value;
-
-    if (!name || !email || !role) {
-        showTempMessage("All fields must be filled.", 'error');
-        return;
-    }
-
-    // --- Mock Staff Creation ---
-    // SYNTAX FIX: Added backticks (`) for template literal
-    console.log(`New Staff Created: Name: ${name}, Email: ${email}, Role: ${role}`);
-    // SYNTAX FIX: Added backticks (`) for template literal
-    showTempMessage(`Staff member '${name}' added successfully!`, 'success');
-    
-    // Reset form
-    document.getElementById('addStaffForm').reset();
-}
-
-
-// =================================
 // VI. GLOBAL INITIALIZATION
-// =================================
-
 document.addEventListener('DOMContentLoaded', function() {
     const currentPage = window.location.pathname.split('/').pop();
 
     if (currentPage === 'login.html') {
-        // Login Page
         const loginForm = document.getElementById('loginForm');
-        if (loginForm) {
-            loginForm.addEventListener('submit', handleLogin);
-        }
+        if (loginForm) loginForm.addEventListener('submit', handleLogin);
     } else {
-        // Other pages → must be logged in
         if (checkAuth()) {
-            if (currentPage === 'dashboard.html') {
-                updateDashboardMetrics();
-            } else if (currentPage === 'analytics.html') {
-                initAnalytics();
-            } else if (currentPage === 'announcements.html') {
-                initAnnouncements();
-            } else if (currentPage === 'staff.html') {
-                initStaffManagement();
-            } else if (currentPage === 'add-staff.html') {
-                initAddStaffPage();
-            }
+            if (currentPage === 'dashboard.html') updateDashboardMetrics();
+            else if (currentPage === 'analytics.html') initAnalytics();
+            else if (currentPage === 'announcements.html') initAnnouncements();
+            else if (currentPage === 'staff.html') initStaffManagement();
 
-            // Attach logout handler
             const logoutLink = document.querySelector('.sidebar a[href="../common/login.html"]');
             if (logoutLink) {
                 logoutLink.addEventListener('click', function(e) {
