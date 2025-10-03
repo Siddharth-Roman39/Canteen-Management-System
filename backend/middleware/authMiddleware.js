@@ -2,7 +2,6 @@ import jwt from "jsonwebtoken";
 import Student from "../models/Student.js";
 import Staff from "../models/Staff.js";
 
-// Protect Routes
 export const protect = async (req, res, next) => {
   let token = req.headers.authorization?.split(" ")[1];
   if (!token) return res.status(401).json({ message: "Not authorized, no token" });
@@ -19,15 +18,19 @@ export const protect = async (req, res, next) => {
 
     if (!user) return res.status(401).json({ message: "User not found" });
 
+    // If student is banned, block access
+    if (decoded.role === "student" && user.isBanned) {
+      return res.status(403).json({ message: "Student account is banned" });
+    }
+
     req.user = { id: user._id, email: user.email, role: decoded.role };
     next();
   } catch (err) {
-    console.error(err.message);
+    console.error(err);
     res.status(401).json({ message: "Token invalid" });
   }
 };
 
-// Role Authorization
 export const authorizeRoles = (...roles) => {
   return (req, res, next) => {
     if (!req.user || !roles.includes(req.user.role)) {

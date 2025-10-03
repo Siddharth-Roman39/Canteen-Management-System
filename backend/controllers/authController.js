@@ -30,7 +30,7 @@ export const signupStudent = async (req, res) => {
   }
 };
 
-// Login (student, staff, admin)
+// Login (student or staff/admin)
 export const login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -47,6 +47,11 @@ export const login = async (req, res) => {
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(401).json({ message: "Invalid credentials" });
+
+    // If student is banned, prevent login
+    if (role === "student" && user.isBanned) {
+      return res.status(403).json({ message: "Account banned" });
+    }
 
     res.json({
       _id: user._id,

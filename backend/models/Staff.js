@@ -2,10 +2,15 @@ import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
 const staffSchema = new mongoose.Schema({
-  name: { type: String },
-  email: { type: String, required: true, unique: true },
+  name: { type: String, trim: true },
+  email: { type: String, required: true, unique: true, lowercase: true, trim: true },
   password: { type: String, required: true },
-  role: { type: String, required: true, enum: ["staff", "admin"] }
+  // top-level role: admin or staff
+  role: { type: String, required: true, enum: ["admin", "staff"], default: "staff" },
+  // subrole describes job / designation (Manager, Chef, Cashier, etc.)
+  subrole: { type: String, default: "Other" },
+  status: { type: String, enum: ["Active", "Removed"], default: "Active" },
+  createdAt: { type: Date, default: Date.now },
 });
 
 staffSchema.pre("save", async function (next) {

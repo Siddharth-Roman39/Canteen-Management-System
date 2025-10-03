@@ -1,8 +1,4 @@
-// =========================================================
-// js/admin.js - CONSOLIDATED JAVASCRIPT (Updated for API)
-// =========================================================
 
-// I. SHARED UTILITIES
 function showTempMessage(message, type = 'success') {
     const container = document.getElementById('messageContainer');
     if (!container) {
@@ -55,6 +51,7 @@ function handleLogin(event) {
 
         if (data.token && data.role === "admin") {
             localStorage.setItem("token", data.token);
+            localStorage.setItem("role", "admin");
             console.log("🔑 JWT Token stored:", data.token);
             alert("Admin login successful!");
             window.location.href = "dashboard.html";
@@ -75,15 +72,13 @@ function checkAuth() {
         window.location.href = "../common/login.html";
         return false;
     }
-    console.log("✅ JWT token found in localStorage:", token);
     return true;
 }
 
 function handleLogout() {
-    console.log("🗑️ Logging out. Token before removal:", localStorage.getItem("token"));
+    console.log("🗑️ Logging out...");
     localStorage.removeItem("token");
     localStorage.removeItem("role");
-    console.log("✅ Token removed. Current token value:", localStorage.getItem("token"));
     alert("Logged out!");
     window.location.href = "../common/login.html";
 }
@@ -91,7 +86,7 @@ function handleLogout() {
 // III. DASHBOARD & ANALYTICS
 function updateDashboardMetrics() {
     fetch("http://localhost:5000/api/admin/stats", {
-        headers: { "Authorization": "Bearer " + localStorage.getItem("token") }
+        headers: getAuthHeaders()
     })
     .then(res => res.json())
     .then(data => {
@@ -131,7 +126,6 @@ function handleCreateNotice(event) {
         showTempMessage("All fields must be filled.", 'error');
         return;
     }
-
     console.log(`Notice Created: Title: ${title}, Audience: ${audience}`);
     showTempMessage("Notice successfully posted!");
     document.getElementById('noticeForm').reset();
@@ -142,258 +136,337 @@ function initAnnouncements() {
     if (form) form.addEventListener('submit', handleCreateNotice);
 }
 
-// V. STAFF MANAGEMENT (API version)
+// V. STAFF MANAGEMENT - Updated for Staff Schema
+async function loadStaffList() {
+    try {
+        console.log("🔄 Loading staff list...");
+        const res = await fetch("http://localhost:5000/api/admin/staff", { 
+            headers: getAuthHeaders() 
+        });
+        
+        if (!res.ok) {
+            throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
+        
+        const data = await res.json();
+        console.log("📋 Staff data received:", data);
+        
+        // Handle different response formats
+        const staffList = data.data || data.staff || data || [];
+        renderStaffTable(staffList);
+        
+    } catch (err) {
+        console.error("❌ Staff loading error:", err);
+        showTempMessage("Unable to load staff: " + err.message, "error");
+        
+        // Show empty table with error message
+        const tbody = document.getElementById('staffTableBody');
+        if (tbody) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:red;">Failed to load staff data</td></tr>';
+        }
+    }
+}
+
 function renderStaffTable(staffList) {
     const tbody = document.getElementById('staffTableBody');
-    if (!tbody) return;
+    if (!tbody) {
+        console.warn("Staff table body not found");
+        return;
+    }
+    
+    if (!Array.isArray(staffList) || staffList.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No staff members found</td></tr>';
+        return;
+    }
+    
     tbody.innerHTML = staffList.map(staff => `
-        <tr data-id="${staff._id}">
-            <td>${staff._id}</td>
-            <td>${staff.name}</td>
-            <td>${staff.role}</td>
+        <tr data-id="${staff._id || staff.id}">
+            <td>${(staff._id || staff.id || '').substring(0,8)}</td>
+            <td>${staff.name || 'N/A'}</td>
+            <td>${staff.email || 'N/A'}</td>
+            <td><span style="color:${staff.role === 'admin' ? 'red' : 'blue'}; font-weight:bold;">${staff.role || 'staff'}</span></td>
+            <td>${staff.subrole || 'Other'}</td>
             <td><span style="color:${staff.status === 'Active' ? 'green' : 'red'}; font-weight:bold;">${staff.status || 'Active'}</span></td>
             <td>
-                <button class="edit-btn">Edit Role</button>
-                <button class="delete-btn">Remove</button>
+                <button onclick="openEditStaff('${staff._id || staff.id}')">Edit</button>
+                <button onclick="deleteStaff('${staff._id || staff.id}')">Remove</button>
             </td>
         </tr>
     `).join('');
-}
-
-function initStaffManagement() {
-    fetch("http://localhost:5000/api/admin/staff", {
-        headers: { "Authorization": "Bearer " + localStorage.getItem("token") }
-    })
-    .then(res => res.json())
-    .then(staffList => {
-        renderStaffTable(staffList);
-        const staffTable = document.getElementById('staffTable');
-        if (staffTable) staffTable.addEventListener('click', handleStaffAction);
-    })
-    .catch(err => console.error("🚨 Staff fetch error:", err));
-}
-
-function handleStaffAction(event) {
-    const target = event.target;
-    if (target.tagName !== 'BUTTON') return;
-    const id = target.closest('tr').dataset.id;
-    console.log(`Staff action on ID: ${id}`);
-}
-
-// ============================================
-// VI. MENU MANAGEMENT (API Integration)
-// ============================================
-
-let currentMenuItems = [];
-
-// Load all menu items for admin
-async function loadAdminMenuItems() {
-    try {
-        const res = await fetch("http://localhost:5000/api/admin/menu", {
-            method: "GET",
-            headers: getAuthHeaders()
-        });
-        
-        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-        
-        const data = await res.json();
-        console.log("📥 Admin Menu Items:", data);
-        
-        if (data.success && data.data) {
-            currentMenuItems = data.data;
-            renderAdminMenuTable(data.data);
-            showTempMessage("Menu items loaded successfully!", "success");
-        }
-    } catch (err) {
-        console.error("🚨 Error loading menu items:", err);
-        showTempMessage("Failed to load menu items", "error");
-    }
-}
-
-// Render menu items in admin table
-function renderAdminMenuTable(items) {
-    const tbody = document.getElementById('menuTableBody');
-    if (!tbody) return;
     
-    if (!items || items.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No menu items found</td></tr>';
-        return;
-    }
-    
-    tbody.innerHTML = items.map(item => `
-        <tr>
-            <td>${item._id.substring(0, 8)}...</td>
-            <td>${item.itemName}</td>
-            <td>₹ ${item.price}</td>
-            <td>${item.category}</td>
-            <td>
-                <span style="color: ${item.availability === 'In Stock' ? 'green' : 'red'}; font-weight: bold;">
-                    ${item.availability}
-                </span>
-            </td>
-            <td>
-                <button class="btn btn-primary" onclick="editMenuItem('${item._id}')">Edit</button>
-                <button class="btn btn-danger" onclick="deleteMenuItem('${item._id}')">Delete</button>
-            </td>
-        </tr>
-    `).join('');
+    console.log(`✅ Rendered ${staffList.length} staff members`);
 }
 
-// Add new menu item
-async function handleAddMenuItem(event) {
+async function addStaff(event) {
     event.preventDefault();
     
-    const itemName = document.getElementById('itemName')?.value?.trim();
-    const price = document.getElementById('itemPrice')?.value;
-    const category = document.getElementById('itemCategory')?.value;
-    const description = document.getElementById('itemDescription')?.value?.trim();
-    
-    if (!itemName || !price || !category) {
-        showTempMessage("Please fill out all required fields", "error");
+    // Get all form values according to Staff schema
+    const name = document.getElementById('staffName').value.trim();
+    const email = document.getElementById('staffEmail').value.trim();
+    const password = document.getElementById('staffPassword').value;
+    const role = document.getElementById('staffRole').value; // admin or staff
+    const subrole = document.getElementById('staffSubrole')?.value.trim() || "Other";
+
+    // Validation
+    if (!name || !email || !password || !role) {
+        showTempMessage("All required fields must be filled.", "error");
         return;
     }
-    
+
+    if (password.length < 6) {
+        showTempMessage("Password must be at least 6 characters long.", "error");
+        return;
+    }
+
+    // Validate role (must be admin or staff)
+    if (!['admin', 'staff'].includes(role)) {
+        showTempMessage("Role must be either 'admin' or 'staff'.", "error");
+        return;
+    }
+
+    console.log("📤 Adding staff:", { name, email, role, subrole });
+
     try {
-        const res = await fetch("http://localhost:5000/api/admin/menu/add", {
+        const res = await fetch("http://localhost:5000/api/admin/staff", {
             method: "POST",
             headers: getAuthHeaders(),
-            body: JSON.stringify({ itemName, price: parseFloat(price), category, description })
+            body: JSON.stringify({ 
+                name, 
+                email, 
+                password, 
+                role, 
+                subrole,
+                status: 'Active'
+            })
         });
         
         const data = await res.json();
-        console.log("📥 Add Menu Item Response:", data);
+        console.log("📥 Add staff response:", data);
         
-        if (data.success) {
-            showTempMessage("Menu item added successfully! ✅", "success");
-            document.getElementById('menuItemForm')?.reset();
-            loadAdminMenuItems();
-        } else {
-            showTempMessage(data.message || "Failed to add item", "error");
+        if (!res.ok) {
+            throw new Error(data.message || `HTTP ${res.status}: Failed to add staff`);
         }
+        
+        showTempMessage("Staff member added successfully!");
+        document.getElementById('addStaffForm').reset();
+        
+        // Redirect back to staff list after successful addition
+        setTimeout(() => {
+            window.location.href = 'staff.html';
+        }, 1500);
+        
     } catch (err) {
-        console.error("🚨 Error adding menu item:", err);
-        showTempMessage("Error adding menu item", "error");
+        console.error("❌ Add staff error:", err);
+        showTempMessage(err.message, "error");
     }
 }
 
-// Edit menu item (populate form)
-function editMenuItem(id) {
-    const item = currentMenuItems.find(item => item._id === id);
-    if (!item) return;
-    
-    document.getElementById('itemName').value = item.itemName;
-    document.getElementById('itemPrice').value = item.price;
-    document.getElementById('itemCategory').value = item.category;
-    document.getElementById('itemDescription').value = item.description || '';
-    
-    const form = document.getElementById('menuItemForm');
-    form.onsubmit = (e) => handleUpdateMenuItem(e, id);
-    
-    const submitBtn = form.querySelector('button[type="submit"]');
-    if (submitBtn) submitBtn.textContent = 'Update Item';
-}
-
-// Update menu item
-async function handleUpdateMenuItem(event, id) {
-    event.preventDefault();
-    
-    const itemName = document.getElementById('itemName')?.value?.trim();
-    const price = document.getElementById('itemPrice')?.value;
-    const category = document.getElementById('itemCategory')?.value;
-    const description = document.getElementById('itemDescription')?.value?.trim();
+async function deleteStaff(id) {
+    if (!confirm("Remove this staff member? This action cannot be undone.")) return;
     
     try {
-        const res = await fetch(`http://localhost:5000/api/admin/menu/update/${id}`, {
-            method: "PUT",
-            headers: getAuthHeaders(),
-            body: JSON.stringify({ itemName, price: parseFloat(price), category, description })
-        });
-        
-        const data = await res.json();
-        
-        if (data.success) {
-            showTempMessage("Menu item updated successfully! ✅", "success");
-            resetMenuForm();
-            loadAdminMenuItems();
-        } else {
-            showTempMessage(data.message || "Failed to update item", "error");
-        }
-    } catch (err) {
-        console.error("🚨 Error updating menu item:", err);
-        showTempMessage("Error updating menu item", "error");
-    }
-}
-
-// Delete menu item
-async function deleteMenuItem(id) {
-    if (!confirm("Are you sure you want to delete this menu item?")) return;
-    
-    try {
-        const res = await fetch(`http://localhost:5000/api/admin/menu/delete/${id}`, {
+        const res = await fetch(`http://localhost:5000/api/admin/staff/${id}`, {
             method: "DELETE",
             headers: getAuthHeaders()
         });
         
         const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Failed to delete staff');
         
-        if (data.success) {
-            showTempMessage("Menu item deleted successfully! ✅", "success");
-            loadAdminMenuItems();
-        } else {
-            showTempMessage(data.message || "Failed to delete item", "error");
-        }
+        showTempMessage("Staff member removed successfully!");
+        loadStaffList();
+        
     } catch (err) {
-        console.error("🚨 Error deleting menu item:", err);
-        showTempMessage("Error deleting menu item", "error");
+        console.error("❌ Delete staff error:", err);
+        showTempMessage(err.message, "error");
     }
 }
 
-// Reset form to add mode
-function resetMenuForm() {
-    const form = document.getElementById('menuItemForm');
-    form?.reset();
-    form.onsubmit = handleAddMenuItem;
+function openEditStaff(id) {
+    const newRole = prompt("Enter new role (admin/staff):");
+    if (!newRole || !['admin', 'staff'].includes(newRole.toLowerCase())) {
+        showTempMessage("Invalid role. Must be 'admin' or 'staff'.", "error");
+        return;
+    }
     
-    const submitBtn = form?.querySelector('button[type="submit"]');
-    if (submitBtn) submitBtn.textContent = '+ Add Item';
+    const newSubrole = prompt("Enter new subrole (Chef, Waiter, Manager, etc.):");
+    if (!newSubrole) return;
+    
+    updateStaff(id, { role: newRole.toLowerCase(), subrole: newSubrole });
 }
 
-// Initialize menu management page
-function initMenuManagement() {
-    console.log("📋 Initializing Menu Management...");
-    loadAdminMenuItems();
-    
-    const form = document.getElementById('menuItemForm');
-    if (form) {
-        form.addEventListener('submit', handleAddMenuItem);
+async function updateStaff(id, body) {
+    try {
+        const res = await fetch(`http://localhost:5000/api/admin/staff/${id}`, {
+            method: "PUT",
+            headers: getAuthHeaders(),
+            body: JSON.stringify(body)
+        });
+        
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Failed to update staff');
+        
+        showTempMessage("Staff member updated successfully!");
+        loadStaffList();
+        
+    } catch (err) {
+        console.error("❌ Update staff error:", err);
+        showTempMessage(err.message, "error");
     }
 }
 
-// ============================================
-// VII. GLOBAL INITIALIZATION
-// ============================================
+// VI. STUDENT MANAGEMENT (if needed)
+async function loadStudents() {
+    try {
+        console.log("🔄 Loading students...");
+        const res = await fetch("http://localhost:5000/api/admin/students", { 
+            headers: getAuthHeaders() 
+        });
+        
+        if (!res.ok) {
+            throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
+        
+        const data = await res.json();
+        console.log("📋 Students data received:", data);
+        
+        const students = data.data || data.students || data || [];
+        renderStudentsTable(students);
+        
+    } catch (err) {
+        console.error("❌ Students loading error:", err);
+        showTempMessage("Unable to load students: " + err.message, "error");
+        
+        const tbody = document.getElementById("studentsTableBody");
+        if (tbody) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:red;">Failed to load student data</td></tr>';
+        }
+    }
+}
+
+function renderStudentsTable(students) {
+    const tbody = document.getElementById("studentsTableBody");
+    if (!tbody) {
+        console.warn("Students table body not found");
+        return;
+    }
+    
+    if (!Array.isArray(students) || students.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No students found</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = students.map(s => `
+        <tr data-id="${s._id || s.id}">
+            <td>${(s._id || s.id || '').substring(0,8)}</td>
+            <td>${s.name || 'N/A'}</td>
+            <td>${s.email || 'N/A'}</td>
+            <td>₹ ${s.balance || 0}</td>
+            <td>
+                <span style="color:${s.isBanned ? 'red' : 'green'}; font-weight:bold;">
+                    ${s.isBanned ? 'BANNED' : 'Active'}
+                </span>
+            </td>
+            <td>
+                <button onclick="toggleBan('${s._id || s.id}', ${s.isBanned || false})">${s.isBanned ? 'Unban' : 'Ban'}</button>
+                <button onclick="deleteStudent('${s._id || s.id}')">Delete</button>
+            </td>
+        </tr>
+    `).join('');
+    
+    console.log(`✅ Rendered ${students.length} students`);
+}
+
+async function toggleBan(id, currentlyBanned) {
+    const action = currentlyBanned ? "Unban" : "Ban";
+    if (!confirm(`${action} this student?`)) return;
+    
+    try {
+        const res = await fetch(`http://localhost:5000/api/admin/students/${id}/ban`, {
+            method: "PUT",
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ ban: !currentlyBanned })
+        });
+        
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || `Failed to ${action.toLowerCase()} student`);
+        
+        showTempMessage(`Student ${action.toLowerCase()}ned successfully!`);
+        loadStudents();
+        
+    } catch (err) {
+        console.error(`❌ ${action} student error:`, err);
+        showTempMessage(err.message, "error");
+    }
+}
+
+async function deleteStudent(id) {
+    if (!confirm("Delete this student permanently? This action cannot be undone.")) return;
+    
+    try {
+        const res = await fetch(`http://localhost:5000/api/admin/students/${id}`, {
+            method: "DELETE",
+            headers: getAuthHeaders()
+        });
+        
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Failed to delete student');
+        
+        showTempMessage("Student deleted successfully!");
+        loadStudents();
+        
+    } catch (err) {
+        console.error("❌ Delete student error:", err);
+        showTempMessage(err.message, "error");
+    }
+}
+
+// VII. INIT
 document.addEventListener('DOMContentLoaded', function() {
-    console.log("✅ admin.js loaded");
     const currentPage = window.location.pathname.split('/').pop();
+    console.log("🚀 Initializing page:", currentPage);
 
     if (currentPage === 'login.html') {
         const loginForm = document.getElementById('loginForm');
         if (loginForm) loginForm.addEventListener('submit', handleLogin);
     } else {
         if (checkAuth()) {
-            // Initialize page-specific functions
-            if (currentPage === 'dashboard.html') updateDashboardMetrics();
-            else if (currentPage === 'analytics.html') initAnalytics();
-            else if (currentPage === 'announcements.html') initAnnouncements();
-            else if (currentPage === 'staff.html') initStaffManagement();
-            else if (currentPage === 'menu.html') initMenuManagement(); // ← IMPORTANT!
+            if (currentPage === 'dashboard.html') {
+                updateDashboardMetrics();
+            }
+            else if (currentPage === 'analytics.html') {
+                initAnalytics();
+            }
+            else if (currentPage === 'announcements.html') {
+                initAnnouncements();
+            }
+            else if (currentPage === 'staff.html') {
+                console.log("📋 Initializing staff management page");
+                loadStaffList();
+                loadStudents(); // Load students if needed
+                
+                const addStaffForm = document.getElementById('addStaffForm');
+                if (addStaffForm) {
+                    addStaffForm.addEventListener('submit', addStaff);
+                }
+            }
+            else if (currentPage === 'addstaff.html') {
+                console.log("➕ Initializing add staff page");
+                const addStaffForm = document.getElementById('addStaffForm');
+                if (addStaffForm) {
+                    addStaffForm.addEventListener('submit', addStaff);
+                }
+            }
+            else if (currentPage === 'students.html') {
+                loadStudents();
+            }
 
-            // Logout handler
+            // Setup logout button
             const logoutBtn = document.querySelector('.logout-btn');
             if (logoutBtn) {
-                logoutBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    handleLogout();
+                logoutBtn.addEventListener('click', (e) => { 
+                    e.preventDefault(); 
+                    handleLogout(); 
                 });
             }
         }
