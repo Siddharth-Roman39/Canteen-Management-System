@@ -30,6 +30,14 @@ function showTempMessage(message, type = 'success') {
     }, 3000);
 }
 
+function getAuthHeaders() {
+    const token = localStorage.getItem("token");
+    return {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+    };
+}
+
 // II. AUTHENTICATION (JWT)
 function handleLogin(event) {
     event.preventDefault();
@@ -43,14 +51,11 @@ function handleLogin(event) {
     })
     .then(res => res.json())
     .then(data => {
-        console.log("📥 Login Response:", data); // log full response
+        console.log("📥 Login Response:", data);
 
         if (data.token && data.role === "admin") {
             localStorage.setItem("token", data.token);
-
-            // ✅ print token to console so you can verify
             console.log("🔑 JWT Token stored:", data.token);
-
             alert("Admin login successful!");
             window.location.href = "dashboard.html";
         } else {
@@ -65,28 +70,23 @@ function handleLogin(event) {
 
 function checkAuth() {
     const token = localStorage.getItem("token");
-
     if (!token) {
         console.log("⚠️ No JWT token found. Redirecting to login.");
         window.location.href = "../common/login.html";
         return false;
     }
-
-    // ✅ show token in console when checking
     console.log("✅ JWT token found in localStorage:", token);
     return true;
 }
 
 function handleLogout() {
     console.log("🗑️ Logging out. Token before removal:", localStorage.getItem("token"));
-
     localStorage.removeItem("token");
-
+    localStorage.removeItem("role");
     console.log("✅ Token removed. Current token value:", localStorage.getItem("token"));
     alert("Logged out!");
     window.location.href = "../common/login.html";
 }
-
 
 // III. DASHBOARD & ANALYTICS
 function updateDashboardMetrics() {
@@ -118,7 +118,6 @@ function updateDashboardMetrics() {
 
 function initAnalytics() {
     console.log("Analytics Initialized.");
-    // still static charts unless you add API
 }
 
 // IV. ANNOUNCEMENTS
@@ -181,8 +180,200 @@ function handleStaffAction(event) {
     console.log(`Staff action on ID: ${id}`);
 }
 
-// VI. GLOBAL INITIALIZATION
+// ============================================
+// VI. MENU MANAGEMENT (API Integration)
+// ============================================
+
+let currentMenuItems = [];
+
+// Load all menu items for admin
+async function loadAdminMenuItems() {
+    try {
+        const res = await fetch("http://localhost:5000/api/admin/menu", {
+            method: "GET",
+            headers: getAuthHeaders()
+        });
+        
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        
+        const data = await res.json();
+        console.log("📥 Admin Menu Items:", data);
+        
+        if (data.success && data.data) {
+            currentMenuItems = data.data;
+            renderAdminMenuTable(data.data);
+            showTempMessage("Menu items loaded successfully!", "success");
+        }
+    } catch (err) {
+        console.error("🚨 Error loading menu items:", err);
+        showTempMessage("Failed to load menu items", "error");
+    }
+}
+
+// Render menu items in admin table
+function renderAdminMenuTable(items) {
+    const tbody = document.getElementById('menuTableBody');
+    if (!tbody) return;
+    
+    if (!items || items.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No menu items found</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = items.map(item => `
+        <tr>
+            <td>${item._id.substring(0, 8)}...</td>
+            <td>${item.itemName}</td>
+            <td>₹ ${item.price}</td>
+            <td>${item.category}</td>
+            <td>
+                <span style="color: ${item.availability === 'In Stock' ? 'green' : 'red'}; font-weight: bold;">
+                    ${item.availability}
+                </span>
+            </td>
+            <td>
+                <button class="btn btn-primary" onclick="editMenuItem('${item._id}')">Edit</button>
+                <button class="btn btn-danger" onclick="deleteMenuItem('${item._id}')">Delete</button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// Add new menu item
+async function handleAddMenuItem(event) {
+    event.preventDefault();
+    
+    const itemName = document.getElementById('itemName')?.value?.trim();
+    const price = document.getElementById('itemPrice')?.value;
+    const category = document.getElementById('itemCategory')?.value;
+    const description = document.getElementById('itemDescription')?.value?.trim();
+    
+    if (!itemName || !price || !category) {
+        showTempMessage("Please fill out all required fields", "error");
+        return;
+    }
+    
+    try {
+        const res = await fetch("http://localhost:5000/api/admin/menu/add", {
+            method: "POST",
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ itemName, price: parseFloat(price), category, description })
+        });
+        
+        const data = await res.json();
+        console.log("📥 Add Menu Item Response:", data);
+        
+        if (data.success) {
+            showTempMessage("Menu item added successfully! ✅", "success");
+            document.getElementById('menuItemForm')?.reset();
+            loadAdminMenuItems();
+        } else {
+            showTempMessage(data.message || "Failed to add item", "error");
+        }
+    } catch (err) {
+        console.error("🚨 Error adding menu item:", err);
+        showTempMessage("Error adding menu item", "error");
+    }
+}
+
+// Edit menu item (populate form)
+function editMenuItem(id) {
+    const item = currentMenuItems.find(item => item._id === id);
+    if (!item) return;
+    
+    document.getElementById('itemName').value = item.itemName;
+    document.getElementById('itemPrice').value = item.price;
+    document.getElementById('itemCategory').value = item.category;
+    document.getElementById('itemDescription').value = item.description || '';
+    
+    const form = document.getElementById('menuItemForm');
+    form.onsubmit = (e) => handleUpdateMenuItem(e, id);
+    
+    const submitBtn = form.querySelector('button[type="submit"]');
+    if (submitBtn) submitBtn.textContent = 'Update Item';
+}
+
+// Update menu item
+async function handleUpdateMenuItem(event, id) {
+    event.preventDefault();
+    
+    const itemName = document.getElementById('itemName')?.value?.trim();
+    const price = document.getElementById('itemPrice')?.value;
+    const category = document.getElementById('itemCategory')?.value;
+    const description = document.getElementById('itemDescription')?.value?.trim();
+    
+    try {
+        const res = await fetch(`http://localhost:5000/api/admin/menu/update/${id}`, {
+            method: "PUT",
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ itemName, price: parseFloat(price), category, description })
+        });
+        
+        const data = await res.json();
+        
+        if (data.success) {
+            showTempMessage("Menu item updated successfully! ✅", "success");
+            resetMenuForm();
+            loadAdminMenuItems();
+        } else {
+            showTempMessage(data.message || "Failed to update item", "error");
+        }
+    } catch (err) {
+        console.error("🚨 Error updating menu item:", err);
+        showTempMessage("Error updating menu item", "error");
+    }
+}
+
+// Delete menu item
+async function deleteMenuItem(id) {
+    if (!confirm("Are you sure you want to delete this menu item?")) return;
+    
+    try {
+        const res = await fetch(`http://localhost:5000/api/admin/menu/delete/${id}`, {
+            method: "DELETE",
+            headers: getAuthHeaders()
+        });
+        
+        const data = await res.json();
+        
+        if (data.success) {
+            showTempMessage("Menu item deleted successfully! ✅", "success");
+            loadAdminMenuItems();
+        } else {
+            showTempMessage(data.message || "Failed to delete item", "error");
+        }
+    } catch (err) {
+        console.error("🚨 Error deleting menu item:", err);
+        showTempMessage("Error deleting menu item", "error");
+    }
+}
+
+// Reset form to add mode
+function resetMenuForm() {
+    const form = document.getElementById('menuItemForm');
+    form?.reset();
+    form.onsubmit = handleAddMenuItem;
+    
+    const submitBtn = form?.querySelector('button[type="submit"]');
+    if (submitBtn) submitBtn.textContent = '+ Add Item';
+}
+
+// Initialize menu management page
+function initMenuManagement() {
+    console.log("📋 Initializing Menu Management...");
+    loadAdminMenuItems();
+    
+    const form = document.getElementById('menuItemForm');
+    if (form) {
+        form.addEventListener('submit', handleAddMenuItem);
+    }
+}
+
+// ============================================
+// VII. GLOBAL INITIALIZATION
+// ============================================
 document.addEventListener('DOMContentLoaded', function() {
+    console.log("✅ admin.js loaded");
     const currentPage = window.location.pathname.split('/').pop();
 
     if (currentPage === 'login.html') {
@@ -190,14 +381,17 @@ document.addEventListener('DOMContentLoaded', function() {
         if (loginForm) loginForm.addEventListener('submit', handleLogin);
     } else {
         if (checkAuth()) {
+            // Initialize page-specific functions
             if (currentPage === 'dashboard.html') updateDashboardMetrics();
             else if (currentPage === 'analytics.html') initAnalytics();
             else if (currentPage === 'announcements.html') initAnnouncements();
             else if (currentPage === 'staff.html') initStaffManagement();
+            else if (currentPage === 'menu.html') initMenuManagement(); // ← IMPORTANT!
 
-            const logoutLink = document.querySelector('.sidebar a[href="../common/login.html"]');
-            if (logoutLink) {
-                logoutLink.addEventListener('click', function(e) {
+            // Logout handler
+            const logoutBtn = document.querySelector('.logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', function(e) {
                     e.preventDefault();
                     handleLogout();
                 });
