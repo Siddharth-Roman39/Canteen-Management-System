@@ -1,91 +1,271 @@
-<!-- 3. Student Menu Page -->
- <!-- 3. Student Menu Page -->
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Menu</title>
-    <link rel="stylesheet" href="../../css/style.css">
-    <link rel="stylesheet" href="../../css/student/student.css">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Full Menu - CMS Student</title>
+    <link rel="stylesheet" href="student.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8f9fa;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: #4a5568;
+            color: white;
+            min-height: 100vh;
+            padding: 20px 0;
+            position: fixed;
+        }
+
+        .sidebar h2 {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid #5a6676;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar nav a {
+            display: block;
+            padding: 12px 20px;
+            color: #e2e8f0;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .sidebar nav a:hover,
+        .sidebar nav a.active {
+            background: #5a6676;
+            border-left: 4px solid #48bb78;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            padding: 30px;
+            width: calc(100% - 250px);
+        }
+
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #2d3748;
+            margin-bottom: 20px;
+        }
+
+        .search-filter-container {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 25px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #48bb78;
+        }
+
+        .category-filters {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .category-btn {
+            padding: 10px 20px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #4a5568;
+            transition: all 0.3s;
+        }
+
+        .category-btn:hover,
+        .category-btn.active {
+            background: #48bb78;
+            color: white;
+            border-color: #48bb78;
+        }
+
+        #menuContainer {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .menu-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .menu-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            padding: 15px;
+            text-align: right;
+        }
+
+        .available-badge {
+            background: white;
+            color: #38a169;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .menu-card h3 {
+            padding: 20px 20px 10px;
+            color: #2d3748;
+            font-size: 22px;
+        }
+
+        .item-description {
+            padding: 0 20px 15px;
+            color: #718096;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .card-footer {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .price {
+            font-size: 24px;
+            font-weight: bold;
+            color: #48bb78;
+        }
+
+        .order-btn {
+            background: linear-gradient(135deg, #4299e1, #3182ce);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .order-btn:hover {
+            background: linear-gradient(135deg, #3182ce, #2c5aa0);
+            transform: scale(1.05);
+        }
+
+        #messageContainer {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            min-width: 300px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #718096;
+        }
+
+        .empty-state h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
-<body class="bg-gray-100 font-poppins text-gray-800">
+<body>
+    <!-- Message Container -->
+    <div id="messageContainer"></div>
 
-    <div class="flex h-screen">
-        <!-- Sidebar -->
-        <div class="w-64 bg-gray-800 text-white p-6 shadow-xl rounded-r-3xl flex flex-col justify-between">
-            <div>
-                <div class="flex items-center mb-8">
-                    <img src="https://placehold.co/40x40/5c6ac4/ffffff?text=C" alt="Logo" class="rounded-full mr-3">
-                    <span class="text-xl font-bold">Canteen</span>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <h2>🎓 CMS Student</h2>
+        <nav>
+            <a href="dashboard.html">📊 Dashboard</a>
+            <a href="menu.html" class="active">🍽️ Full Menu</a>
+            <a href="orders.html">📦 My Orders</a>
+            <a href="../common/login.html" class="logout-link">🚪 Logout</a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header with Search and Filters -->
+        <div class="header">
+            <h1>🍽️ Full Menu</h1>
+            
+            <div class="search-filter-container">
+                <div class="search-box">
+                    <input 
+                        type="text" 
+                        id="searchInput" 
+                        placeholder="🔍 Search for items..."
+                        autocomplete="off">
                 </div>
-                <nav>
-                    <a href="dashboard.html" class="flex items-center py-3 px-4 rounded-xl text-gray-300 hover:bg-gray-700 transition-all hover:scale-105 mb-2">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-9v10a1 1 0 01-1 1h-3m-6 0a1 1 0 00-1 1v2a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 00-1-1v0z"></path></svg>
-                        Dashboard
-                    </a>
-                    <a href="menu.html" class="flex items-center py-3 px-4 rounded-xl text-white bg-blue-600 font-semibold mb-2 transition-all hover:scale-105">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-                        Menu
-                    </a>
-                    <a href="my-orders.html" class="flex items-center py-3 px-4 rounded-xl text-gray-300 hover:bg-gray-700 transition-all hover:scale-105">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M12 15h.01"></path></svg>
-                        My Orders
-                    </a>
-                </nav>
-            </div>
-            <a href="#" class="flex items-center py-3 px-4 rounded-xl text-gray-300 hover:bg-gray-700 transition-all hover:scale-105">
-                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                Logout
-            </a>
-        </div>
-
-        <!-- Main Content -->
-        <div class="flex-1 p-8 overflow-y-auto">
-            <div class="flex justify-between items-center mb-8">
-                <h1 class="text-4xl font-bold">Full Menu</h1>
-                <div class="relative">
-                    <input type="text" placeholder="Search menu..." class="px-4 py-2 rounded-xl bg-white border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                    <svg class="w-5 h-5 absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                </div>
-            </div>
-
-            <!-- Filter Buttons -->
-            <div class="flex items-center mb-8 space-x-4 overflow-x-auto pb-2">
-                <button class="px-6 py-3 rounded-2xl bg-blue-600 text-white font-semibold flex-shrink-0 transition-transform hover:scale-105">All</button>
-                <button class="px-6 py-3 rounded-2xl bg-white text-gray-600 border border-gray-300 font-semibold flex-shrink-0 transition-transform hover:scale-105">Snacks</button>
-                <button class="px-6 py-3 rounded-2xl bg-white text-gray-600 border border-gray-300 font-semibold flex-shrink-0 transition-transform hover:scale-105">Beverages</button>
-                <button class="px-6 py-3 rounded-2xl bg-white text-gray-600 border border-gray-300 font-semibold flex-shrink-0 transition-transform hover:scale-105">Main Course</button>
-                <button class="px-6 py-3 rounded-2xl bg-white text-gray-600 border border-gray-300 font-semibold flex-shrink-0 transition-transform hover:scale-105">Desserts</button>
-            </div>
-
-            <!-- Menu Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8" id="menu-grid">
-                <!-- Example of a menu item card -->
-                <div class="bg-white rounded-3xl shadow-lg overflow-hidden flex flex-col">
-                    <div class="relative">
-                        <img src="https://placehold.co/400x250/5c6ac4/ffffff?text=Burger" alt="Menu Item" class="w-full h-40 object-cover">
-                        <span class="absolute top-3 right-3 bg-green-500 text-white text-xs font-semibold px-3 py-1 rounded-full">Available</span>
-                    </div>
-                    <div class="p-6 flex-1 flex flex-col justify-between">
-                        <div>
-                            <h3 class="font-bold text-lg">Spicy Chicken Burger</h3>
-                            <p class="text-gray-500 text-sm mb-4">A classic burger with a spicy kick.</p>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-2xl font-bold text-blue-600">₹80</span>
-                            <a href="item-details.html" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors transform hover:scale-105">Order Now</a>
-                        </div>
-                    </div>
+                
+                <div class="category-filters">
+                    <button class="category-btn active" data-category="All" onclick="filterByCategory('All')">All</button>
+                    <button class="category-btn" data-category="Snack" onclick="filterByCategory('Snack')">Snacks</button>
+                    <button class="category-btn" data-category="Beverage" onclick="filterByCategory('Beverage')">Beverages</button>
+                    <button class="category-btn" data-category="Main Course" onclick="filterByCategory('Main Course')">Main Course</button>
+                    <button class="category-btn" data-category="Desserts" onclick="filterByCategory('Desserts')">Desserts</button>
                 </div>
             </div>
         </div>
-    </div>
-    
-    <script src="../../js/student/student.js"></script>
+
+        <!-- Menu Items Grid -->
+        <div id="menuContainer">
+            <p style="text-align:center; color:#999; grid-column: 1/-1;">Loading available items...</p>
+        </div>
+    </main>
+
+    <!-- JavaScript -->
+    <script src="student.js"></script>
 </body>
 </html>

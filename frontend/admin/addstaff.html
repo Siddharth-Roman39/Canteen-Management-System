@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Add Staff - CMS</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <h2>🍴 CMS Admin</h2>
+      <a href="dashboard.html">📊 Dashboard</a>
+      <a href="menu.html">🍴 Menu Management</a>
+      <a href="reports.html">📦 Orders & Reports</a>
+      <a href="staff.html" class="active">👥 User Management</a>
+      <a href="analytics.html">📈 Analytics</a>
+      <a href="announcements.html">📢 Announcements</a>
+      <button onclick="handleLogout()" class="logout-btn">🔐 Logout</button>
+    </aside>
+
+    <main class="content">
+      <header>
+        <h1>➕ Add New Staff Member</h1>
+        <p style="color:#666; margin-top:5px;">Fill the form below to create a new staff account</p>
+      </header>
+
+      <div id="messageContainer"></div>
+
+      <!-- Add Staff Form -->
+      <section class="card" style="margin-bottom:30px;">
+        <form id="addStaffForm" style="display:grid; gap:10px; max-width:400px;">
+          <input type="text" id="name" placeholder="Full Name" required>
+          <input type="email" id="email" placeholder="Email" required>
+          <input type="password" id="password" placeholder="Password" required>
+          <select id="role">
+            <option value="staff">Staff</option>
+            <option value="admin">Admin</option>
+          </select>
+          <input type="text" id="subrole" placeholder="Sub-role (optional)">
+          <button type="submit" style="padding:10px; background:#007bff; color:white; border:none; border-radius:4px;">
+            Add Staff
+          </button>
+        </form>
+      </section>
+
+      <!-- Staff Table -->
+      <section class="card">
+        <h3>👨‍💼 Staff Members</h3>
+        <div class="table-container" style="overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Sub-role</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="staffTableBody">
+              <tr><td colspan="7" style="text-align:center; padding:20px; color:#666;">Loading staff data...</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="margin-top:15px; font-size:14px; color:#666;">
+          <strong>📊 Staff Statistics:</strong> 
+          <span id="staffCount">Loading...</span> total staff members
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="admin.js"></script>
+
+  <script>
+    // Load existing staff on page load
+    async function loadStaff() {
+      const token = localStorage.getItem('token');
+      if (!token) return alert("You must be logged in as admin!");
+
+      try {
+        const res = await fetch('http://localhost:5000/api/admin/staff', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const staffList = await res.json();
+
+        const tbody = document.getElementById('staffTableBody');
+        tbody.innerHTML = '';
+
+        staffList.forEach(staff => {
+          const tr = document.createElement('tr');
+          tr.dataset.id = staff._id;
+          tr.innerHTML = `
+            <td>${staff._id}</td>
+            <td>${staff.name}</td>
+            <td>${staff.email}</td>
+            <td>${staff.role}</td>
+            <td>${staff.subrole}</td>
+            <td>${staff.status || 'Active'}</td>
+            <td>
+              <button onclick="editStaff('${staff._id}')">✏️</button>
+              <button onclick="removeStaff('${staff._id}', this)">🗑️</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+        updateStaffCounter();
+      } catch (err) {
+        console.error(err);
+        alert("Failed to load staff");
+      }
+    }
+
+    // Add new staff
+    document.getElementById('addStaffForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const role = document.getElementById('role').value;
+      const subrole = document.getElementById('subrole').value;
+      const token = localStorage.getItem('token');
+
+      if (!token) return alert("You must be logged in as admin!");
+
+      try {
+        const res = await fetch('http://localhost:5000/api/admin/staff', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ name, email, password, role, subrole })
+        });
+
+        const data = await res.json();
+        if (!res.ok) return alert(data.message || 'Failed to add staff');
+
+        showTempMessage(`Staff ${data.staff.name} added successfully!`, 'success');
+
+        // Append to table
+        const tbody = document.getElementById('staffTableBody');
+        const tr = document.createElement('tr');
+        tr.dataset.id = data.staff._id;
+        tr.innerHTML = `
+          <td>${data.staff._id}</td>
+          <td>${data.staff.name}</td>
+          <td>${data.staff.email}</td>
+          <td>${data.staff.role}</td>
+          <td>${data.staff.subrole}</td>
+          <td>${data.staff.status || 'Active'}</td>
+          <td>
+            <button onclick="editStaff('${data.staff._id}')">✏️</button>
+            <button onclick="removeStaff('${data.staff._id}', this)">🗑️</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+        updateStaffCounter();
+
+        document.getElementById('addStaffForm').reset();
+      } catch (err) {
+        console.error(err);
+        alert('Server error');
+      }
+    });
+
+    // Remove staff (soft delete)
+    async function removeStaff(id, btn) {
+      const token = localStorage.getItem('token');
+      if (!token) return alert("You must be logged in as admin!");
+
+      if (!confirm("Are you sure you want to remove this staff?")) return;
+
+      try {
+        const res = await fetch(`http://localhost:5000/api/admin/staff/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (!res.ok) return alert(data.message || 'Failed to remove staff');
+
+        // Remove row from table
+        btn.closest('tr').remove();
+        updateStaffCounter();
+        showTempMessage("Staff removed successfully", "info");
+      } catch (err) {
+        console.error(err);
+        alert('Server error');
+      }
+    }
+
+    // Update counter
+    function updateStaffCounter() {
+      const staffRows = document.querySelectorAll('#staffTableBody tr[data-id]');
+      document.getElementById('staffCount').textContent = staffRows.length;
+    }
+
+    // Dummy edit function placeholder
+    function editStaff(id) {
+      alert("Edit functionality coming soon for staff ID: " + id);
+    }
+
+    // Load staff on page load
+    loadStaff();
+  </script>
+</body>
+</html>

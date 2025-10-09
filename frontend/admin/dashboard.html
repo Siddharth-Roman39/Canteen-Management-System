@@ -1,1 +1,73 @@
-<!-- Admin Dashboard Page -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard - CMS</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <h2>🍴 CMS Admin</h2>
+      <a href="dashboard.html" class="active">📊 Dashboard</a>
+      <a href="menu.html">🍴 Menu Management</a>
+      <a href="reports.html">📦 Orders & Reports</a>
+      <a href="staff.html">👥 User Management</a>
+      <a href="analytics.html">📈 Analytics</a>
+      <a href="announcements.html">📢 Announcements</a>
+      <button onclick="handleLogout()">🔐 Logout</button>
+    </aside>
+
+    <main class="content">
+      <header>
+        <h1>📊 Admin Dashboard</h1>
+      </header>
+
+      <section class="stats">
+        <div class="stat-card revenue">
+          <h3>Today's Revenue</h3>
+          <p id="todayRevenue">...</p>
+        </div>
+        <div class="stat-card">
+          <h3>Total Orders Today</h3>
+          <p id="todayOrders">...</p>
+        </div>
+        <div class="stat-card">
+          <h3>Pending Payments</h3>
+          <p id="pendingPayments">...</p>
+        </div>
+        <div class="stat-card">
+          <h3>Active Staff</h3>
+          <p id="activeStaff">...</p>
+        </div>
+      </section>
+
+      <section class="cards">
+        <div class="card">
+          <h3>⚡ Quick Actions</h3>
+          <div class="quick-actions">
+            <button onclick="window.location.href='menu.html'">+ Add Item</button>
+            <button onclick="window.location.href='announcements.html'">📢 Create Notice</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>📦 Recent Orders</h3>
+          <ul id="recentOrdersList"></ul>
+        </div>
+
+        <div class="card" style="border-top-color:red;">
+          <h3>⚠ Low Stock Alerts</h3>
+          <ul id="lowStockList" style="color:red;">
+            <li>Milk (2L remaining)</li>
+            <li>Burger Buns (1 Pack remaining)</li>
+          </ul>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="admin.js"></script>
+  <script>window.onload = fetchAdminDashboard;</script>
+</body>
+</html>

@@ -1,1 +1,85 @@
 <!-- Admin Analytics Page -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Analytics - CMS</title>
+    <link rel="stylesheet" href="admin.css">
+    <!-- Chart.js CDN for visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+</head>
+<body>
+    <div class="layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <h2>🍴 CMS Admin</h2>
+            <a href="dashboard.html">📊 Dashboard</a>
+            <a href="menu.html">🍴 Menu Management</a>
+            <a href="reports.html">📦 Orders & Reports</a>
+            <a href="staff.html">👥 User Management</a>
+            <a href="analytics.html" class="active">📈 Analytics</a>
+            <a href="announcements.html">📢 Announcements</a>
+            <a href="index.html">🔐 Logout</a> 
+        </aside>
+
+        <!-- Main Content -->
+        <main class="content">
+            <header>
+                <h1>📈 Sales & Performance Analytics</h1>
+            </header>
+
+            <!-- Key Metric Cards (AOV, Retention) -->
+            <section class="stats">
+                <div class="stat-card">
+                    <h3>Average Order Value (AOV)</h3>
+                    <p>₹ 94.80</p>
+                </div>
+                <div class="stat-card revenue">
+                    <h3>Customer Retention Rate</h3>
+                    <p>45%</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Peak Order Time</h3>
+                    <p>12:45 PM</p>
+                </div>
+            </section>
+            
+            <!-- Charts and Reports -->
+            <section class="cards" style="grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));">
+                
+                <!-- Top 10 Ordered Items -->
+                <div class="card">
+                    <h3>Top 10 Ordered Items</h3>
+                    <p style="color:#666; margin-bottom: 10px;">Units sold in the last 30 days.</p>
+                    <div style="height: 300px;">
+                        <canvas id="topOrdersChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- AOV Trend -->
+                <div class="card">
+                    <h3>Average Order Value Trend</h3>
+                    <p style="color:#666; margin-bottom: 10px;">AOV performance over the last 5 weeks.</p>
+                    <div style="height: 300px;">
+                        <canvas id="aovTrendChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Least Ordered Items List -->
+                 <div class="card" style="border-top-color: #f0ad4e;">
+                    <h3>Least Ordered Items</h3>
+                    <ul style="list-style:disc; margin-left: 20px; padding-top:10px;">
+                        <li>Soup of the Day (2 orders)</li>
+                        <li>Fruit Salad (5 orders)</li>
+                        <li>Diet Soda (8 orders)</li>
+                        <li>Cheese Omelette (11 orders)</li>
+                    </ul>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>

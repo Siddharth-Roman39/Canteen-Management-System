@@ -1,1 +1,76 @@
-<!-- Staff Dashboard Page -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Staff Dashboard</title>
+  <link rel="stylesheet" href="staff.css">
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <h2>🍴 CMS</h2>
+      <a href="dashboard.html" class="active">📋 Dashboard</a>
+      <a href="outofstock.html">🥘 Stock</a>
+      <a href="reports.html">📊 Reports</a>
+      <a href="profile.html">👤 Profile</a>
+      <button onclick="handleLogoutStaff()">🔐 Logout</button>
+    </aside>
+
+    <main class="content">
+      <header>
+        <h2>📋 Orders Dashboard</h2>
+      </header>
+
+      <section class="stats">
+        <div class="stat-card">
+          <h3>Total Orders Today</h3>
+          <p id="totalOrders">0</p>
+        </div>
+        <div class="stat-card">
+          <h3>Orders in Queue</h3>
+          <p id="queueOrders">0</p>
+        </div>
+        <div class="stat-card">
+          <h3>Completed Orders</h3>
+          <p id="completedOrders">0</p>
+        </div>
+        <div class="stat-card">
+          <h3>Cancelled Orders</h3>
+          <p id="cancelledOrders">0</p>
+        </div>
+      </section>
+
+      <section class="cards">
+        <!-- Live Queue -->
+        <div class="card">
+          <h3>📥 Live Queue</h3>
+          <ul id="queueOrdersList">
+            <!-- Queue orders will be loaded dynamically -->
+          </ul>
+        </div>
+
+        <!-- Active Orders -->
+        <div class="card">
+          <h3>🔥 Active Orders</h3>
+          <ul id="activeOrders">
+            <!-- Active orders will be loaded dynamically -->
+          </ul>
+        </div>
+      </section>
+
+      <div id="staff-data"></div>
+    </main>
+  </div>
+
+  <!-- ✅ Load staff.js -->
+  <script src="staff.js"></script>
+  <script>
+    // Automatically fetch dashboard data when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      if (localStorage.getItem("staffToken")) {
+        fetchDashboardData();
+      }
+    });
+  </script>
+</body>
+</html>

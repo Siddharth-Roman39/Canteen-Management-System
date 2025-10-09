@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Management - CMS</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <h2>🍴 CMS Admin</h2>
+      <a href="dashboard.html">📊 Dashboard</a>
+      <a href="menu.html">🍴 Menu Management</a>
+      <a href="reports.html">📦 Orders & Reports</a>
+      <a href="staff.html" class="active">👥 User Management</a>
+      <a href="analytics.html">📈 Analytics</a>
+      <a href="announcements.html">📢 Announcements</a>
+      <button onclick="handleLogout()" class="logout-btn">🔐 Logout</button>
+    </aside>
+
+    <main class="content">
+      <header>
+        <h1>👥 User Management System</h1>
+        <p style="color:#666; margin-top:5px;">Manage staff members and student accounts</p>
+      </header>
+
+      <div id="messageContainer"></div>
+
+      <!-- Staff Management Section -->
+      <section class="card" style="margin-bottom:30px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+          <h3>👨‍💼 Staff Management</h3>
+          <button onclick="window.location.href='addstaff.html'" 
+                  style="padding:10px 20px; background:var(--primary-color, #007bff); color:white; border:none; border-radius:4px; font-weight:bold; cursor:pointer;">
+            ➕ Add New Staff Member
+          </button>
+        </div>
+        
+        <div class="table-container" style="overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Sub-role</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="staffTableBody">
+              <tr><td colspan="7" style="text-align:center; padding:20px; color:#666;">Loading staff data...</td></tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <div style="margin-top:15px; font-size:14px; color:#666;">
+          <strong>📊 Staff Statistics:</strong> 
+          <span id="staffCount">Loading...</span> total staff members
+        </div>
+      </section>
+
+      <!-- Student Management Section -->
+      <section class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+          <h3>🎓 Student Account Management</h3>
+          <div style="display:flex; gap:10px;">
+            <button onclick="refreshStudentData()" 
+                    style="padding:8px 15px; background:#28a745; color:white; border:none; border-radius:4px; cursor:pointer;">
+              🔄 Refresh
+            </button>
+          </div>
+        </div>
+        
+        <div class="table-container" style="overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Student ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Account Balance</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="studentsTableBody">
+              <tr><td colspan="6" style="text-align:center; padding:20px; color:#666;">Loading student data...</td></tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <div style="margin-top:15px; font-size:14px; color:#666;">
+          <strong>📊 Student Statistics:</strong> 
+          <span id="studentCount">Loading...</span> total student accounts | 
+          <span id="activeStudents">Loading...</span> active | 
+          <span id="bannedStudents">Loading...</span> banned
+        </div>
+      </section>
+
+      <!-- Quick Actions Section -->
+      <section class="card" style="margin-top:30px;">
+        <h3>⚡ Quick Actions</h3>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:15px; margin-top:15px;">
+          
+          <button onclick="exportUserData()" 
+                  style="padding:15px; background:#17a2b8; color:white; border:none; border-radius:4px; cursor:pointer; text-align:left;">
+            <strong>📊 Export User Data</strong><br>
+            <small style="opacity:0.8;">Download user reports</small>
+          </button>
+          
+          <button onclick="bulkActions()" 
+                  style="padding:15px; background:#6c757d; color:white; border:none; border-radius:4px; cursor:pointer; text-align:left;">
+            <strong>⚙️ Bulk Actions</strong><br>
+            <small style="opacity:0.8;">Manage multiple users</small>
+          </button>
+          
+          <button onclick="viewSystemLogs()" 
+                  style="padding:15px; background:#6f42c1; color:white; border:none; border-radius:4px; cursor:pointer; text-align:left;">
+            <strong>📋 System Logs</strong><br>
+            <small style="opacity:0.8;">View activity logs</small>
+          </button>
+          
+          <button onclick="sendNotifications()" 
+                  style="padding:15px; background:#fd7e14; color:white; border:none; border-radius:4px; cursor:pointer; text-align:left;">
+            <strong>📧 Send Notifications</strong><br>
+            <small style="opacity:0.8;">Notify users</small>
+          </button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="admin.js"></script>
+  
+  <script>
+    // Additional utility functions for staff.html
+    function refreshStudentData() {
+      showTempMessage("Refreshing student data...", "info");
+      loadStudents();
+    }
+    
+    function exportUserData() {
+      // Placeholder for export functionality
+      showTempMessage("Export feature coming soon!", "info");
+    }
+    
+    function bulkActions() {
+      // Placeholder for bulk actions
+      showTempMessage("Bulk actions feature coming soon!", "info");
+    }
+    
+    function viewSystemLogs() {
+      // Placeholder for system logs
+      showTempMessage("System logs feature coming soon!", "info");
+    }
+    
+    function sendNotifications() {
+      // Redirect to announcements page
+      window.location.href = 'announcements.html';
+    }
+    
+    // Update counters when data loads
+    function updateStaffCounter() {
+      const staffRows = document.querySelectorAll('#staffTableBody tr[data-id]');
+      document.getElementById('staffCount').textContent = staffRows.length;
+    }
+    
+    function updateStudentCounters() {
+      const studentRows = document.querySelectorAll('#studentsTableBody tr[data-id]');
+      const totalStudents = studentRows.length;
+      let activeCount = 0, bannedCount = 0;
+      
+      studentRows.forEach(row => {
+        const statusCell = row.children[4];
+        if (statusCell && statusCell.textContent.includes('BANNED')) {
+          bannedCount++;
+        } else {
+          activeCount++;
+        }
+      });
+      
+      document.getElementById('studentCount').textContent = totalStudents;
+      document.getElementById('activeStudents').textContent = activeCount;
+      document.getElementById('bannedStudents').textContent = bannedCount;
+    }
+    
+    // Override the render functions to include counter updates
+    const originalRenderStaffTable = renderStaffTable;
+    renderStaffTable = function(staffList) {
+      originalRenderStaffTable(staffList);
+      updateStaffCounter();
+    };
+    
+    const originalRenderStudentsTable = renderStudentsTable;
+    renderStudentsTable = function(students) {
+      originalRenderStudentsTable(students);
+      updateStudentCounters();
+    };
+  </script>
+</body>
+</html>
