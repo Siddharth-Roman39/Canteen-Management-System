@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Student - Notices</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f6f9; margin: 0; padding: 0; }
+    header { background: #2980b9; color: white; padding: 15px; text-align: center; }
+    .container { max-width: 800px; margin: 20px auto; background: white; padding: 20px;
+      border-radius: 8px; box-shadow: 0px 4px 8px rgba(0,0,0,0.1);}
+    .notice { background: #ecf0f1; padding: 10px; margin: 10px 0; border-radius: 5px; }
+    .date { font-size: 12px; color: #555; }
+  </style>
+</head>
+<body>
+  <header><h1>Student - View Notices</h1></header>
+  <div class="container">
+    <h2>Notices</h2>
+    <div id="noticeList"></div>
+  </div>
+
+  <script>
+    const API_URL = "http://localhost:5000/api/notices";
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      alert("Please login again!");
+      window.location.href = "../login.html";
+    }
+
+    async function loadNotices() {
+      try {
+        const res = await fetch(API_URL, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        const list = document.getElementById("noticeList");
+        list.innerHTML = "";
+
+        if (!Array.isArray(data) || data.length === 0) {
+          list.innerHTML = "<p>No notices available.</p>";
+          return;
+        }
+
+        data.forEach(n => {
+          list.innerHTML += `
+            <div class="notice">
+              <h3>${n.title}</h3>
+              <p>${n.content}</p>
+              <p class="date">📅 ${new Date(n.date).toLocaleDateString()}</p>
+            </div>`;
+        });
+      } catch (err) {
+        console.error("Error loading notices:", err);
+      }
+    }
+
+    window.onload = loadNotices;
+  </script>
+</body>
+</html>

@@ -9,6 +9,7 @@ import staffRoutes from "./routes/staff.js";
 import studentRoutes from "./routes/student.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 import menuRoutes from "./routes/menuRoutes.js";
+import noticeRoutes from "./routes/noticeRoutes.js"; // ✅ NEW
 
 dotenv.config();
 connectDB();
@@ -25,7 +26,8 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/staff", staffRoutes);
 app.use("/api/student", studentRoutes);
 app.use("/api", dashboardRoutes);
-app.use('/api', menuRoutes); 
+app.use("/api", menuRoutes);
+app.use("/api/notices", noticeRoutes); // ✅ NEW
 
 // Root
 app.get("/", (req, res) => res.send("Canteen Management Backend Running"));
