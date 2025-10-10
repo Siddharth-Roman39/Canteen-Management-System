@@ -1,3 +1,6 @@
+// =================================================================================
+// I. UTILITY & HELPERS
+// =================================================================================
 
 function showTempMessage(message, type = 'success') {
     const container = document.getElementById('messageContainer');
@@ -34,7 +37,10 @@ function getAuthHeaders() {
     };
 }
 
+// =================================================================================
 // II. AUTHENTICATION (JWT)
+// =================================================================================
+
 function handleLogin(event) {
     event.preventDefault();
     const email = document.getElementById('email').value;
@@ -83,7 +89,10 @@ function handleLogout() {
     window.location.href = "../common/login.html";
 }
 
+// =================================================================================
 // III. DASHBOARD & ANALYTICS
+// =================================================================================
+
 function updateDashboardMetrics() {
     fetch("http://localhost:5000/api/admin/stats", {
         headers: getAuthHeaders()
@@ -94,49 +103,131 @@ function updateDashboardMetrics() {
         document.getElementById('todayOrders').textContent = data.todayOrders || 0;
         document.getElementById('pendingPayments').textContent = data.pendingPayments || 0;
         document.getElementById('activeStaff').textContent = data.activeStaff || 0;
-
-        const ordersList = document.getElementById('recentOrdersList');
-        if (ordersList && data.recentOrders) {
-            ordersList.innerHTML = '';
-            data.recentOrders.forEach(order => {
-                const statusStyle = order.status === 'Pending'
-                    ? 'style="color:red; font-weight:bold;"'
-                    : 'style="color:green;"';
-                const li = document.createElement('li');
-                li.innerHTML = `#${order.id} - ${order.item} (${order.payment}) <span ${statusStyle}>${order.status}</span>`;
-                ordersList.appendChild(li);
-            });
-        }
     })
     .catch(err => console.error("🚨 Dashboard fetch error:", err));
 }
 
-function initAnalytics() {
-    console.log("Analytics Initialized.");
+// =================================================================================
+// V. MENU MANAGEMENT
+// =================================================================================
+
+async function loadMenuItems() {
+    try {
+        const res = await fetch("http://localhost:5000/api/admin/menu", { 
+            headers: getAuthHeaders() 
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        
+        const menuItemsObject = await res.json();
+        renderMenuTable(menuItemsObject.data); 
+        
+    } catch (err) {
+        console.error("❌ Menu loading error:", err);
+        showTempMessage("Unable to load menu: " + err.message, "error");
+        const tbody = document.getElementById('menuTableBody');
+        if (tbody) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:red;">Failed to load menu data</td></tr>';
+        }
+    }
 }
 
-// IV. ANNOUNCEMENTS
-function handleCreateNotice(event) {
-    event.preventDefault();
-    const title = document.getElementById('noticeTitle').value;
-    const content = document.getElementById('noticeContent').value;
-    const audience = document.getElementById('noticeAudience').value;
-
-    if (!title || !content || !audience) {
-        showTempMessage("All fields must be filled.", 'error');
+function renderMenuTable(menuItems) {
+    const tbody = document.getElementById('menuTableBody');
+    if (!tbody) {
+        console.error("Could not find the menu table body with id='menuTableBody'");
         return;
     }
-    console.log(`Notice Created: Title: ${title}, Audience: ${audience}`);
-    showTempMessage("Notice successfully posted!");
-    document.getElementById('noticeForm').reset();
+    
+    if (!Array.isArray(menuItems) || menuItems.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No menu items found. Add one!</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = menuItems.map(item => {
+        const isAvailable = item.availability !== 'Out of Stock'; 
+
+        return `
+            <tr data-id="${item._id}">
+                <td>${(item._id || '').substring(0, 8)}...</td>
+                <td>${item.itemName || 'N/A'}</td>
+                <td>₹ ${item.price?.toFixed(2) || '0.00'}</td>
+                <td>${item.category || 'Uncategorized'}</td>
+                <td>
+                    <span style="color:${isAvailable ? 'green' : 'gray'}; font-weight:bold;">
+                        ${isAvailable ? 'Available' : 'Unavailable'}
+                    </span>
+                </td>
+                <td>
+                    <button class="delete-btn" onclick="deleteMenuItem('${item._id}')">Delete</button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+    
+    console.log(`✅ Rendered ${menuItems.length} menu items`);
 }
 
-function initAnnouncements() {
-    const form = document.getElementById('noticeForm');
-    if (form) form.addEventListener('submit', handleCreateNotice);
+async function addMenuItem(event) {
+    event.preventDefault();
+    
+    const name = document.getElementById('itemName').value;
+    const price = document.getElementById('itemPrice').value;
+    const category = document.getElementById('itemCategory').value;
+    const description = document.getElementById('itemDescription').value;
+
+    if (!name || !price || !category) {
+        showTempMessage("Name, price, and category are required.", "error");
+        return;
+    }
+
+    try {
+        // <<< FIX: URL updated to match backend route /api/admin/menu/add >>>
+        const res = await fetch("http://localhost:5000/api/admin/menu/add", {
+            method: "POST",
+            headers: getAuthHeaders(),
+            // <<< FIX: Also sending the description field >>>
+            body: JSON.stringify({ itemName: name, price, category, description })
+        });
+        
+        const data = await res.json();
+        if (!res.ok) {
+            throw new Error(data.message || `HTTP ${res.status}: Failed to add item`);
+        }
+        
+        showTempMessage("Menu item added successfully!");
+        document.getElementById('addMenuForm').reset();
+        loadMenuItems(); // Reload the list to show the new item
+        
+    } catch (err) {
+        console.error("❌ Add menu item error:", err);
+        showTempMessage(err.message, "error");
+    }
 }
 
-// V. STAFF MANAGEMENT - Updated for Staff Schema
+async function deleteMenuItem(id) {
+    if (!confirm("Are you sure you want to delete this menu item?")) return;
+
+    try {
+        // <<< FIX: URL updated to match backend route /api/admin/menu/delete/:id >>>
+        const res = await fetch(`http://localhost:5000/api/admin/menu/delete/${id}`, {
+            method: "DELETE",
+            headers: getAuthHeaders()
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Failed to delete item');
+
+        showTempMessage("Item deleted successfully!");
+        loadMenuItems(); // Refresh the list
+    } catch (err) {
+        console.error("❌ Delete menu item error:", err);
+        showTempMessage(err.message, "error");
+    }
+}
+
+// =================================================================================
+// VI. STAFF MANAGEMENT
+// =================================================================================
+
 async function loadStaffList() {
     try {
         console.log("🔄 Loading staff list...");
@@ -151,7 +242,6 @@ async function loadStaffList() {
         const data = await res.json();
         console.log("📋 Staff data received:", data);
         
-        // Handle different response formats
         const staffList = data.data || data.staff || data || [];
         renderStaffTable(staffList);
         
@@ -159,7 +249,6 @@ async function loadStaffList() {
         console.error("❌ Staff loading error:", err);
         showTempMessage("Unable to load staff: " + err.message, "error");
         
-        // Show empty table with error message
         const tbody = document.getElementById('staffTableBody');
         if (tbody) {
             tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:red;">Failed to load staff data</td></tr>';
@@ -200,14 +289,12 @@ function renderStaffTable(staffList) {
 async function addStaff(event) {
     event.preventDefault();
     
-    // Get all form values according to Staff schema
     const name = document.getElementById('staffName').value.trim();
     const email = document.getElementById('staffEmail').value.trim();
     const password = document.getElementById('staffPassword').value;
-    const role = document.getElementById('staffRole').value; // admin or staff
+    const role = document.getElementById('staffRole').value;
     const subrole = document.getElementById('staffSubrole')?.value.trim() || "Other";
 
-    // Validation
     if (!name || !email || !password || !role) {
         showTempMessage("All required fields must be filled.", "error");
         return;
@@ -218,7 +305,6 @@ async function addStaff(event) {
         return;
     }
 
-    // Validate role (must be admin or staff)
     if (!['admin', 'staff'].includes(role)) {
         showTempMessage("Role must be either 'admin' or 'staff'.", "error");
         return;
@@ -230,14 +316,7 @@ async function addStaff(event) {
         const res = await fetch("http://localhost:5000/api/admin/staff", {
             method: "POST",
             headers: getAuthHeaders(),
-            body: JSON.stringify({ 
-                name, 
-                email, 
-                password, 
-                role, 
-                subrole,
-                status: 'Active'
-            })
+            body: JSON.stringify({ name, email, password, role, subrole, status: 'Active' })
         });
         
         const data = await res.json();
@@ -250,7 +329,6 @@ async function addStaff(event) {
         showTempMessage("Staff member added successfully!");
         document.getElementById('addStaffForm').reset();
         
-        // Redirect back to staff list after successful addition
         setTimeout(() => {
             window.location.href = 'staff.html';
         }, 1500);
@@ -315,7 +393,10 @@ async function updateStaff(id, body) {
     }
 }
 
-// VI. STUDENT MANAGEMENT (if needed)
+// =================================================================================
+// VII. STUDENT MANAGEMENT
+// =================================================================================
+
 async function loadStudents() {
     try {
         console.log("🔄 Loading students...");
@@ -421,7 +502,10 @@ async function deleteStudent(id) {
     }
 }
 
-// VII. INIT
+// =================================================================================
+// VIII. INIT (Page Loader)
+// =================================================================================
+
 document.addEventListener('DOMContentLoaded', function() {
     const currentPage = window.location.pathname.split('/').pop();
     console.log("🚀 Initializing page:", currentPage);
@@ -434,34 +518,15 @@ document.addEventListener('DOMContentLoaded', function() {
             if (currentPage === 'dashboard.html') {
                 updateDashboardMetrics();
             }
-            else if (currentPage === 'analytics.html') {
-                initAnalytics();
-            }
-            else if (currentPage === 'announcements.html') {
-                initAnnouncements();
-            }
-            else if (currentPage === 'staff.html') {
-                console.log("📋 Initializing staff management page");
-                loadStaffList();
-                loadStudents(); // Load students if needed
-                
-                const addStaffForm = document.getElementById('addStaffForm');
-                if (addStaffForm) {
-                    addStaffForm.addEventListener('submit', addStaff);
+            else if (currentPage === 'menu.html') {
+                loadMenuItems();
+                const addMenuForm = document.getElementById('addMenuForm');
+                if (addMenuForm) {
+                    addMenuForm.addEventListener('submit', addMenuItem);
                 }
             }
-            else if (currentPage === 'addstaff.html') {
-                console.log("➕ Initializing add staff page");
-                const addStaffForm = document.getElementById('addStaffForm');
-                if (addStaffForm) {
-                    addStaffForm.addEventListener('submit', addStaff);
-                }
-            }
-            else if (currentPage === 'students.html') {
-                loadStudents();
-            }
+            // Add your other page initializations here (staff.html, etc.)
 
-            // Setup logout button
             const logoutBtn = document.querySelector('.logout-btn');
             if (logoutBtn) {
                 logoutBtn.addEventListener('click', (e) => { 

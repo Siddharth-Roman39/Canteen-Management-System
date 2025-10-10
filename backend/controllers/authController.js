@@ -30,34 +30,45 @@ export const signupStudent = async (req, res) => {
   }
 };
 
-// Login (student or staff/admin)
+// Login (student or staff/admin) - CORRECTED VERSION
 export const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    let user = await Student.findOne({ email });
-    let role = "student";
+    // --- CHANGE 1: Search for a Staff/Admin user FIRST ---
+    let user = await Staff.findOne({ email });
+    let role = user ? user.role : null; // Get role from staff record if it exists
 
+    // --- CHANGE 2: If no staff user was found, THEN search for a Student ---
     if (!user) {
-      user = await Staff.findOne({ email });
-      if (user) role = user.role;
+      user = await Student.findOne({ email });
+      if (user) {
+        role = "student"; // Set role to student only if found in the Student collection
+      }
     }
 
-    if (!user) return res.status(401).json({ message: "Invalid credentials" });
+    // If user is still not found in either collection, credentials are bad
+    if (!user) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
 
+    // Now, compare the password for the found user
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(401).json({ message: "Invalid credentials" });
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
 
     // If student is banned, prevent login
     if (role === "student" && user.isBanned) {
       return res.status(403).json({ message: "Account banned" });
     }
 
+    // Generate token with the CORRECT role
     res.json({
       _id: user._id,
       name: user.name,
       email: user.email,
-      role,
+      role, // This will now be 'admin' or 'staff' if found in the Staff collection
       token: generateToken(user._id, role),
     });
   } catch (err) {
